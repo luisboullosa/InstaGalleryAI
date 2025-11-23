@@ -1,3 +1,94 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "A quiet city street at night, with neon lights reflecting on the wet pavement.",
+      "imageUrl": "https://images.unsplash.com/photo-1611416457332-946853cc75d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxuaWdodCUyMGNpdHl8ZW58MHx8fHwxNzYzODY3OTU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "night city"
+    },
+    {
+      "id": "2",
+      "description": "A close-up of a blooming flower, with water droplets on its petals.",
+      "imageUrl": "https://images.unsplash.com/photo-1538998073820-4dfa76300194?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxuYXR1cmUlMjBmbG93ZXJ8ZW58MHx8fHwxNzYzOTAzMjY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "nature flower"
+    },
+    {
+      "id": "3",
+      "description": "A minimalist architectural shot of a modern building against a clear blue sky.",
+      "imageUrl": "https://images.unsplash.com/photo-1603043858931-109fc909a631?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YXJjaGl0ZWN0dXJlJTIwbWluaW1hbHxlbnwwfHx8fDE3NjM5MDMyNjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "architecture minimal"
+    },
+    {
+      "id": "4",
+      "description": "An abstract painting with bold strokes of blue and gold.",
+      "imageUrl": "https://images.unsplash.com/photo-1602464729960-f95937746b68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhYnN0cmFjdCUyMGFydHxlbnwwfHx8fDE3NjM4NjA1NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract art"
+    },
+    {
+      "id": "5",
+      "description": "A portrait of a person looking away from the camera, with a thoughtful expression.",
+      "imageUrl": "https://images.unsplash.com/photo-1728028254879-2d7b4a276cf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBwZXJzb258ZW58MHx8fHwxNzYzNzk5NTc0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait person"
+    },
+    {
+      "id": "6",
+      "description": "A dramatic landscape of mountains at sunset.",
+      "imageUrl": "https://images.unsplash.com/photo-1621846846625-f0bde2eb7c3c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxuYXR1cmUlMjBsYW5kc2NhcGV8ZW58MHx8fHwxNzYzODA5MDE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "nature landscape"
+    },
+    {
+      "id": "7",
+      "description": "A black and white photo of a vintage car.",
+      "imageUrl": "https://images.unsplash.com/photo-1727179418829-d3a1c27fb86d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9ub2Nocm9tZSUyMHZpbnRhZ2V8ZW58MHx8fHwxNzYzOTAzMjY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "monochrome vintage"
+    },
+    {
+      "id": "8",
+      "description": "A macro shot of an insect on a leaf.",
+      "imageUrl": "https://images.unsplash.com/photo-1620062317671-ef6441546d7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxuYXR1cmUlMjBtYWNyb3xlbnwwfHx8fDE3NjM4MjM4Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "nature macro"
+    },
+    {
+      "id": "9",
+      "description": "Street art graffiti on a brick wall.",
+      "imageUrl": "https://images.unsplash.com/photo-1583225214464-9296029427aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzdHJlZXQlMjBhcnR8ZW58MHx8fHwxNzYzODYwNjkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "street art"
+    },
+    {
+      "id": "10",
+      "description": "A surreal digital collage combining nature and technology.",
+      "imageUrl": "https://images.unsplash.com/photo-1708191514541-44d079be07be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkaWdpdGFsJTIwc3VycmVhbHxlbnwwfHx8fDE3NjM5MDMyNjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital surreal"
+    },
+    {
+      "id": "11",
+      "description": "A tranquil beach scene with gentle waves.",
+      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxuYXR1cmUlMjBiZWFjaHxlbnwwfHx8fDE3NjM5MDMyNjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "nature beach"
+    },
+    {
+      "id": "12",
+      "description": "A vibrant food photography shot from above.",
+      "imageUrl": "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmb29kJTIwcGhvdG9ncmFwaHl8ZW58MHx8fHwxNzYzNzk3MjY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "food photography"
+    },
+    {
+      "id": "13",
+      "description": "A candid shot of people laughing in a cafe.",
+      "imageUrl": "https://images.unsplash.com/photo-1676035292628-133b3dafe3b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZW9wbGUlMjBjYW5kaWR8ZW58MHx8fHwxNzYzOTAzMjY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "people candid"
+    },
+    {
+      "id": "14",
+      "description": "A lonely tree in a foggy field.",
+      "imageUrl": "https://images.unsplash.com/photo-1649089475708-1ddfb7aeba21?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxuYXR1cmUlMjBtaW5pbWFsfGVufDB8fHx8MTc2MzkwMzI2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "nature minimal"
+    },
+    {
+      "id": "15",
+      "description": "Geometric patterns in building facades.",
+      "imageUrl": "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhcmNoaXRlY3R1cmUlMjBhYnN0cmFjdHxlbnwwfHx8fDE3NjM4MTQ1MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "architecture abstract"
+    }
+  ]
 }
