@@ -46,7 +46,7 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
         <SidebarSeparator className="my-4" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/" passHref legacyBehavior>
+            <Link href="/">
                 <SidebarMenuButton tooltip="Dashboard" isActive={isHomePage && !currentTheme}>
                     <Home />
                     <span>Dashboard</span>
@@ -71,7 +71,7 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
           )}
            <SidebarMenuItem>
                 <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground">Settings</h3>
-                 <Link href="/agents" passHref legacyBehavior>
+                 <Link href="/agents">
                     <SidebarMenuButton tooltip="Agents" isActive={pathname === '/agents'}>
                         <Users />
                         <span>Agents</span>
