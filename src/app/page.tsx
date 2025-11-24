@@ -35,11 +35,16 @@ export default function Home() {
     setCritiques([]);
     // Mocking AI selection based on theme keywords and image hints
     const themeKeywords = theme.name.toLowerCase().split(' ');
-    const filteredImages = PlaceHolderImages.filter(image => 
+    let filteredImages = PlaceHolderImages.filter(image => 
       themeKeywords.some(keyword => image.imageHint.includes(keyword))
     );
-    // If no images match, show a random selection for demonstration
-    setGalleryImages(filteredImages.length > 0 ? filteredImages.slice(0, 9) : PlaceHolderImages.slice(0, 9));
+
+    if (filteredImages.length === 0) {
+      // If no images match, show a random selection for demonstration
+      filteredImages = [...PlaceHolderImages].sort(() => 0.5 - Math.random()).slice(0, 9);
+    }
+    
+    setGalleryImages(filteredImages.slice(0, 15)); // Limit initial gallery size
     setSelectedImage(null);
   };
   
