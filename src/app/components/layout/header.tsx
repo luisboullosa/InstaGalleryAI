@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Theme } from '@/lib/types';
 import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle, Save, Download, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 type AppHeaderProps = {
   theme: Theme | null;
@@ -97,18 +98,22 @@ export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2" />
-              <span>Profile</span>
-            </DropdownMenuItem>
+            <Link href="/profile">
+              <DropdownMenuItem>
+                <User className="mr-2" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuItem>
               <Instagram className="mr-2" />
               <span>Instagram</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2" />
-              <span>Settings</span>
-            </DropdownMenuItem>
+            <Link href="/profile">
+              <DropdownMenuItem>
+                <Settings className="mr-2" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut className="mr-2" />
