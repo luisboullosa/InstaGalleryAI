@@ -6,6 +6,7 @@ import { provideAiPoweredImageCritique as provideAiPoweredImageCritiqueFlow } fr
 import { provideAiPoweredGalleryCritique as provideAiPoweredGalleryCritiqueFlow } from '@/ai/flows/provide-ai-powered-gallery-critique';
 import { CriticSchema } from '@/lib/types';
 import type { ImagePlaceholder } from '@/lib/placeholder-images';
+import type { ProvideAiPoweredImageCritiqueOutput } from '@/ai/flows/provide-ai-powered-image-critique';
 
 export type SuggestThemesState = {
   status: 'success' | 'error' | 'idle';
@@ -44,8 +45,8 @@ export async function suggestThemesAction(
 }
 
 export type CritiqueState = {
-    status: 'success' | 'error' | 'idle' | 'loading';
-    data?: Awaited<ReturnType<typeof provideAiPoweredImageCritiqueFlow>>;
+    status: 'success' | 'error' | 'idle';
+    data?: ProvideAiPoweredImageCritiqueOutput & { imageId: string };
     error?: string;
 }
 
@@ -67,7 +68,7 @@ export async function getImageCritiqueAction(prevState: CritiqueState, formData:
         };
     }
 
-    const { imageUrl, artisticIntention, theme, critic } = validatedFields.data;
+    const { imageUrl, artisticIntention, theme, critic, imageId } = validatedFields.data;
 
     try {
         const response = await fetch(imageUrl);
@@ -87,7 +88,7 @@ export async function getImageCritiqueAction(prevState: CritiqueState, formData:
             critic,
         });
 
-        return { status: 'success', data: critique };
+        return { status: 'success', data: {...critique, imageId } };
 
     } catch (error) {
         console.error(error);

@@ -86,7 +86,7 @@ function CritiqueResult({ critique, onDelete }: { critique: Critique, onDelete: 
         </Card>
       </div>
 
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion type="single" collapsible className="w-full" defaultValue="ai-usage">
         <AccordionItem value="ai-usage">
           <AccordionTrigger>AI Usage Feedback</AccordionTrigger>
           <AccordionContent>{critique.aiUsageFeedback || 'No AI usage detected.'}</AccordionContent>
@@ -139,10 +139,12 @@ type ImageCritiqueViewProps = {
 export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated, onCritiqueDeleted }: ImageCritiqueViewProps) {
   const { agents, critiques } = useApp();
   const activeCritics = React.useMemo(() => Object.values(agents).filter(a => a.active), [agents]);
-
-  const [state, formAction, isPending] = useActionState(getImageCritiqueAction, initialState);
-  const { toast } = useToast();
+  
   const formRef = React.useRef<HTMLFormElement>(null);
+  const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
+  const { pending } = useFormStatus();
+
+  const { toast } = useToast();
   
   const [critic, setCritic] = React.useState<Critic>(activeCritics[0]?.id || 'Default AI');
   
@@ -150,6 +152,8 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
     if (!image) return null;
     return critiques.find(c => c.imageId === image.id) || null;
   }, [critiques, image]);
+
+  const critiqueToShow = state.status === 'success' && state.data && image?.id === state.data.imageId ? { ...state.data, imageId: image.id, artisticIntention: ''} : existingCritique;
 
   React.useEffect(() => {
     if (state.status === 'error' && state.error) {
@@ -170,11 +174,18 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
 
   React.useEffect(() => {
     if (image) {
+      // Reset form state when image changes
+      formRef.current?.reset();
+      const currentArtisticIntention = existingCritique?.artisticIntention || '';
+      if(formRef.current?.artisticIntention) {
+        formRef.current.artisticIntention.value = currentArtisticIntention;
+      }
+      
       if (activeCritics.length > 0 && !activeCritics.find(c => c.id === critic)) {
         setCritic(activeCritics[0].id);
       }
     }
-  }, [image, activeCritics, critic]);
+  }, [image, existingCritique, activeCritics, critic]);
   
   const handleDeleteCritique = () => {
     if (image) {
@@ -185,8 +196,6 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
       })
     }
   }
-
-  const critiqueToShow = state.status === 'success' ? state.data : existingCritique;
   
   return (
     <Sheet open={!!image} onOpenChange={onOpenChange}>
@@ -247,13 +256,13 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                         <SheetFooter className="!flex-col sm:!flex-row">
                             <SubmitCritiqueButton />
                         </SheetFooter>
+
+                        {pending && <CritiqueSkeleton />}
+                    
+                        {critiqueToShow && !pending && (
+                            <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
+                        )}
                     </form>
-                    
-                    {isPending && <CritiqueSkeleton />}
-                    
-                    {critiqueToShow && !isPending && (
-                        <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
-                    )}
                   </div>
                 </ScrollArea>
             </div>
