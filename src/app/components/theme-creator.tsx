@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Wand2 } from 'lucide-react';
-import React from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import React, { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { suggestThemesAction, type SuggestThemesState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -47,7 +47,7 @@ type ThemeCreatorProps = {
 
 export function ThemeCreator({ onCreateGallery }: ThemeCreatorProps) {
   const [themeInput, setThemeInput] = React.useState('');
-  const [state, formAction] = useFormState(suggestThemesAction, initialState);
+  const [state, formAction] = useActionState(suggestThemesAction, initialState);
   const { toast } = useToast();
 
   React.useEffect(() => {
