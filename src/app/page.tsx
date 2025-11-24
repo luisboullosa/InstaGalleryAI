@@ -33,18 +33,27 @@ export default function Home() {
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
     setCritiques([]);
-    // Mocking AI selection based on theme keywords and image hints
+    
     const themeKeywords = theme.name.toLowerCase().split(' ');
     let filteredImages = PlaceHolderImages.filter(image => 
       themeKeywords.some(keyword => image.imageHint.includes(keyword))
     );
 
     if (filteredImages.length === 0) {
-      // If no images match, show a random selection for demonstration
       filteredImages = [...PlaceHolderImages].sort(() => 0.5 - Math.random()).slice(0, 9);
     }
     
-    setGalleryImages(filteredImages.slice(0, 15)); // Limit initial gallery size
+    // Ensure no duplicates in the initial gallery
+    const uniqueImageIds = new Set<string>();
+    const uniqueImages = filteredImages.filter(image => {
+        if (uniqueImageIds.has(image.id)) {
+            return false;
+        }
+        uniqueImageIds.add(image.id);
+        return true;
+    });
+
+    setGalleryImages(uniqueImages.slice(0, 15));
     setSelectedImage(null);
   };
   
@@ -58,22 +67,25 @@ export default function Home() {
   };
 
   const handleAddImages = () => {
-    // This is a mock implementation. In a real app, this would open a picker.
     const existingIds = new Set(galleryImages.map(img => img.id));
-    const newImages = PlaceHolderImages.filter(img => !existingIds.has(img)).slice(0, 3);
-    if (newImages.length > 0) {
-        setGalleryImages(prev => [...prev, ...newImages]);
-        toast({
-            title: 'Images Added',
-            description: `${newImages.length} new image(s) were added to the gallery.`,
-        });
-    } else {
+    const availableImages = PlaceHolderImages.filter(img => !existingIds.has(img));
+    
+    if (availableImages.length === 0) {
         toast({
             variant: 'destructive',
             title: 'No More Images',
             description: 'There are no more unique images to add.',
         });
+        return;
     }
+
+    const newImages = [...availableImages].sort(() => 0.5 - Math.random()).slice(0, 3);
+    
+    setGalleryImages(prev => [...prev, ...newImages]);
+    toast({
+        title: 'Images Added',
+        description: `${newImages.length} new image(s) were added to the gallery.`,
+    });
   };
 
   const handleConnectInstagram = () => {
