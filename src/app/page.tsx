@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -138,7 +139,9 @@ export default function Home() {
     const formData = new FormData();
     formData.append('theme', currentTheme.name);
     formData.append('images', JSON.stringify(galleryImages));
-    galleryCritiqueAction(formData);
+    React.startTransition(() => {
+      galleryCritiqueAction(formData);
+    });
   }
   
   const handleDeleteGalleryCritique = () => {
