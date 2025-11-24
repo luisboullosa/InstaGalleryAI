@@ -166,14 +166,15 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
   React.useEffect(() => {
     if (image) {
       // Reset form action state when image changes
-      const form = formRef.current;
-      if (form) {
-        form.reset();
-        // Manually set the intention textarea value from the existing critique if present
-        const intentionTextarea = form.elements.namedItem('artisticIntention') as HTMLTextAreaElement | null;
-        if (intentionTextarea) {
-            intentionTextarea.value = existingCritique?.artisticIntention || '';
-        }
+      formRef.current?.reset();
+      const resetFormData = new FormData();
+      resetFormData.append('type', 'reset');
+      formAction(resetFormData);
+
+      // Manually set the intention textarea value from the existing critique if present
+      const intentionTextarea = formRef.current?.elements.namedItem('artisticIntention') as HTMLTextAreaElement | null;
+      if (intentionTextarea) {
+          intentionTextarea.value = existingCritique?.artisticIntention || '';
       }
       
       // Reset critic selection if current one isn't active
@@ -181,18 +182,20 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
         setCritic(activeCritics[0].id);
       }
     }
-  }, [image, existingCritique, activeCritics, critic]);
+  }, [image, existingCritique, activeCritics, critic, formAction]);
 
   // Determine what to display
-  const critiqueToShow = existingCritique;
+  const critiqueToShow = (state.status === 'success' && state.data?.imageId === image?.id) ? { ...state.data, artisticIntention: formRef.current?.artisticIntention.value || '' } : existingCritique;
   
+  const isCritiquing = state.status === 'loading';
+
   const handleDeleteCritique = () => {
     if (image) {
       onCritiqueDeleted(image.id);
-      toast({
-        title: "Critique Deleted",
-        description: "The critique for this image has been removed."
-      })
+      formRef.current?.reset();
+      const resetFormData = new FormData();
+      resetFormData.append('type', 'reset');
+      formAction(resetFormData);
     }
   }
 
@@ -226,15 +229,16 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
                         <Textarea
                             id="artistic-intention"
                             name="artisticIntention"
-                            placeholder="e.g., 'Capture the feeling of loneliness in a bustling city...'"
+                            placeholder="e.g., 'Capture the feeling of loneliness...'"
                             defaultValue={existingCritique?.artisticIntention || ''}
                             required
+                            readOnly={!!critiqueToShow}
                         />
                     </div>
 
                     <div className="space-y-2">
                       <Label>Council of Critics</Label>
-                      <Select name="critic" value={critic} onValueChange={(value) => setCritic(value as Critic)}>
+                      <Select name="critic" value={critic} onValueChange={(value) => setCritic(value as Critic)} disabled={!!critiqueToShow}>
                           <SelectTrigger>
                             <Users className="mr-2" />
                             <SelectValue placeholder="Select a critic..." />
@@ -247,19 +251,21 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
                       </Select>
                     </div>
                     
-                    <div>
-                        <SubmitCritiqueButton />
-                    </div>
+                    {!critiqueToShow && (
+                        <div>
+                            <SubmitCritiqueButton />
+                        </div>
+                    )}
                     
                     <Separator />
 
-                    {state.status === 'loading' && <CritiqueSkeleton />}
+                    {isCritiquing && <CritiqueSkeleton />}
                 
-                    {critiqueToShow && state.status !== 'loading' && (
+                    {critiqueToShow && !isCritiquing && (
                         <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
                     )}
 
-                    {!critiqueToShow && state.status !== 'loading' && (
+                    {!critiqueToShow && !isCritiquing && (
                         <div className="text-center text-muted-foreground py-8">
                             <Bot size={32} className="mx-auto" />
                             <p className="mt-2 text-sm">Generate an AI critique for this image.</p>

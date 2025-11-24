@@ -45,7 +45,7 @@ export async function suggestThemesAction(
 }
 
 export type CritiqueState = {
-    status: 'success' | 'error' | 'idle';
+    status: 'success' | 'error' | 'idle' | 'loading';
     data?: ProvideAiPoweredImageCritiqueOutput & { imageId: string };
     error?: string;
 }
@@ -59,6 +59,10 @@ const critiqueSchema = z.object({
 });
 
 export async function getImageCritiqueAction(prevState: CritiqueState, formData: FormData) : Promise<CritiqueState> {
+    if (formData.get('type') === 'reset') {
+        return { status: 'idle' };
+    }
+
     const validatedFields = critiqueSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -109,7 +113,13 @@ const galleryCritiqueSchema = z.object({
   images: z.string(), // JSON string of ImagePlaceholder[]
 });
 
-export async function getGalleryCritiqueAction(prevState: GalleryCritiqueState, formData: FormData) : Promise<GalleryCritiqueState> {
+export async function getGalleryCritiqueAction(prevState: GalleryCritiqueState, formData: FormData | {type: 'reset'}) : Promise<GalleryCritiqueState> {
+    if (formData instanceof FormData === false) {
+        if (formData.type === 'reset') {
+            return { status: 'idle' };
+        }
+    }
+    
     const validatedFields = galleryCritiqueSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {

@@ -4,14 +4,16 @@ import * as React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BookOpen, Lightbulb, TrendingUp, Users } from 'lucide-react';
+import { BookOpen, Lightbulb, RefreshCw, TrendingUp, Users } from 'lucide-react';
 import type { ProvideAiPoweredGalleryCritiqueOutput } from '@/ai/flows/provide-ai-powered-gallery-critique';
 import type { Theme } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 type GalleryCritiqueReportProps = {
   critique: ProvideAiPoweredGalleryCritiqueOutput | null;
   theme: Theme | null;
+  onDelete: () => void;
 };
 
 const criticAvatars: Record<string, string> = {
@@ -80,7 +82,8 @@ function ReportSkeleton() {
 
 export default function GalleryCritiqueReport({
   critique,
-  theme
+  theme,
+  onDelete,
 }: GalleryCritiqueReportProps) {
 
   return (
@@ -93,11 +96,21 @@ export default function GalleryCritiqueReport({
                 <CritiqueSection title="Emerging Threads" icon={<TrendingUp size={20} />} sections={critique.emergingThreads} />
                 <CritiqueSection title="Future Development" icon={<Lightbulb size={20} />} sections={critique.futureDevelopment} />
 
-                <div className="pt-4">
-                    <h3 className="text-lg font-semibold mb-2">Discuss with the Council</h3>
-                    <div className="p-4 border rounded-lg bg-muted/50 text-center">
-                        <p className="text-sm text-muted-foreground">This feature is coming soon!</p>
-                        <p className="text-xs text-muted-foreground mt-1">You'll be able to ask follow-up questions to the critics.</p>
+                <div className="pt-4 space-y-4">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-2">Manage Critique</h3>
+                         <Button onClick={onDelete} variant="outline" className="w-full">
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Delete & Re-run Critique
+                        </Button>
+                    </div>
+
+                    <div>
+                        <h3 className="text-lg font-semibold mb-2">Discuss with the Council</h3>
+                        <div className="p-4 border rounded-lg bg-muted/50 text-center">
+                            <p className="text-sm text-muted-foreground">This feature is coming soon!</p>
+                            <p className="text-xs text-muted-foreground mt-1">You'll be able to ask follow-up questions to the critics.</p>
+                        </div>
                     </div>
                 </div>
             </div>

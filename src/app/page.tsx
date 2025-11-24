@@ -44,8 +44,7 @@ export default function Home() {
   
   const { toast } = useToast();
 
-  const [galleryCritiqueState, galleryCritiqueAction] = useActionState(getGalleryCritiqueAction, initialGalleryCritiqueState);
-  const [isGalleryCritiquePending, startGalleryCritiqueTransition] = useTransition();
+  const [galleryCritiqueState, galleryCritiqueAction, isGalleryCritiquePending] = useActionState(getGalleryCritiqueAction, initialGalleryCritiqueState);
   
   const detailViewActive = !!selectedImage || showGalleryCritique;
   const hasExistingGalleryCritique = galleryCritiqueState.status === 'success' && galleryCritiqueState.data;
@@ -53,6 +52,7 @@ export default function Home() {
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
     setCritiques([]);
+    galleryCritiqueAction({type: 'reset'}); // Reset gallery critique state
     
     const imageMap = new Map<string, ImagePlaceholder>();
     const themeKeywords = theme.name.toLowerCase().split(' ');
@@ -82,6 +82,10 @@ export default function Home() {
   
   const handleCritiqueDeleted = (imageId: string) => {
     setCritiques(prev => prev.filter(c => c.imageId !== imageId));
+    toast({
+        title: "Critique Deleted",
+        description: "The critique for this image has been removed."
+    });
   };
 
   const handleImageRemove = (imageToRemove: ImagePlaceholder) => {
@@ -126,12 +130,18 @@ export default function Home() {
         setSelectedImage(null);
         return;
     }
-
-    startGalleryCritiqueTransition(() => {
-        const formData = new FormData();
-        formData.append('theme', currentTheme.name);
-        formData.append('images', JSON.stringify(galleryImages));
-        galleryCritiqueAction(formData);
+    const formData = new FormData();
+    formData.append('theme', currentTheme.name);
+    formData.append('images', JSON.stringify(galleryImages));
+    galleryCritiqueAction(formData);
+  }
+  
+  const handleDeleteGalleryCritique = () => {
+    galleryCritiqueAction({type: 'reset'});
+    setShowGalleryCritique(false);
+    toast({
+      title: 'Gallery Critique Deleted',
+      description: 'You can now re-run the gallery critique.',
     });
   }
 
@@ -173,6 +183,12 @@ export default function Home() {
     }
   }, [galleryCritiqueState, toast]);
 
+  // When selecting a saved gallery, reset the critique state
+  const handleSelectAndReset = (gallery: any) => {
+    handleSelectGallery(gallery);
+    galleryCritiqueAction({type: 'reset'});
+  }
+
   return (
     <ResizablePanelGroup direction="horizontal" className="flex min-h-screen">
       <ResizablePanel defaultSize={20} minSize={15} maxSize={25} collapsible>
@@ -183,7 +199,7 @@ export default function Home() {
             onConnectInstagram={handleConnectInstagram}
             onConnectGoogleDrive={handleConnectGoogleDrive}
             savedGalleries={savedGalleries}
-            onSelectGallery={handleSelectGallery}
+            onSelectGallery={handleSelectAndReset}
           />
       </ResizablePanel>
       <ResizableHandle withHandle />
@@ -245,6 +261,7 @@ export default function Home() {
                 <GalleryCritiqueReport
                   critique={galleryCritiqueState.status === 'success' ? galleryCritiqueState.data : null}
                   theme={currentTheme}
+                  onDelete={handleDeleteGalleryCritique}
                 />
               ) : (
                 <ImageCritiqueView

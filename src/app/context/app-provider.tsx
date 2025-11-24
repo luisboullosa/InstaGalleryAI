@@ -62,17 +62,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleSaveGallery = (theme: Theme, images: ImagePlaceholder[], critiques: Critique[]) => {
-    const newSavedGallery: SavedGallery = {
-        id: theme.name + '-' + Date.now(),
-        theme: theme,
-        images: images,
-        critiques: critiques,
-    };
-    setSavedGalleries(prev => [...prev, newSavedGallery]);
-    toast({
-        title: 'Gallery Saved',
-        description: `"${theme.name}" has been added to your collection.`,
-    });
+    const existingIndex = savedGalleries.findIndex(g => g.theme.name === theme.name);
+    
+    if (existingIndex > -1) {
+        // Update existing gallery
+        const updatedGalleries = [...savedGalleries];
+        updatedGalleries[existingIndex] = { ...updatedGalleries[existingIndex], images, critiques };
+        setSavedGalleries(updatedGalleries);
+        toast({
+            title: 'Gallery Updated',
+            description: `"${theme.name}" has been updated.`,
+        });
+    } else {
+        // Add new gallery
+        const newSavedGallery: SavedGallery = {
+            id: theme.name + '-' + Date.now(),
+            theme: theme,
+            images: images,
+            critiques: critiques,
+        };
+        setSavedGalleries(prev => [...prev, newSavedGallery]);
+        toast({
+            title: 'Gallery Saved',
+            description: `"${theme.name}" has been added to your collection.`,
+        });
+    }
   };
 
   const handleSelectGallery = (gallery: SavedGallery) => {
