@@ -39,19 +39,13 @@ export default function Home() {
       themeKeywords.some(keyword => image.imageHint.includes(keyword))
     );
 
+    // If no images match the keywords, get a random slice of images
     if (filteredImages.length === 0) {
       filteredImages = [...PlaceHolderImages].sort(() => 0.5 - Math.random()).slice(0, 9);
     }
     
-    // Ensure no duplicates in the initial gallery
-    const uniqueImageIds = new Set<string>();
-    const uniqueImages = filteredImages.filter(image => {
-        if (uniqueImageIds.has(image.id)) {
-            return false;
-        }
-        uniqueImageIds.add(image.id);
-        return true;
-    });
+    // Robust de-duplication using a Map to ensure unique IDs
+    const uniqueImages = Array.from(new Map(filteredImages.map(image => [image.id, image])).values());
 
     setGalleryImages(uniqueImages.slice(0, 15));
     setSelectedImage(null);
