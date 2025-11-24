@@ -12,14 +12,18 @@ import {
 import { Logo } from '@/components/logo';
 import { ThemeCreator } from '@/app/components/theme-creator';
 import type { Theme } from '@/lib/types';
-import { Bell, Home, Instagram } from 'lucide-react';
+import { Bell, Home, Instagram, FolderKanban } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type AppSidebarProps = {
   onCreateGallery: (theme: Theme) => void;
   currentTheme: Theme | null;
+  isInstagramConnected: boolean;
+  onConnectInstagram: () => void;
+  onConnectGoogleDrive: () => void;
 };
 
-export function AppSidebar({ onCreateGallery, currentTheme }: AppSidebarProps) {
+export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected, onConnectInstagram, onConnectGoogleDrive }: AppSidebarProps) {
   return (
     <>
       <SidebarHeader>
@@ -30,7 +34,7 @@ export function AppSidebar({ onCreateGallery, currentTheme }: AppSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent className="p-2">
-        <ThemeCreator onCreateGallery={onCreateGallery} />
+        <ThemeCreator onCreateGallery={onCreateGallery} isInstagramConnected={isInstagramConnected} />
         <SidebarSeparator className="my-4" />
         <SidebarMenu>
           <SidebarMenuItem>
@@ -49,14 +53,16 @@ export function AppSidebar({ onCreateGallery, currentTheme }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Connect Instagram" variant="outline">
-              <Instagram />
-              <span>Connect Instagram</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="space-y-2 p-2">
+          <Button onClick={onConnectInstagram} variant={isInstagramConnected ? 'secondary' : 'outline'} className="w-full justify-start gap-2" disabled={isInstagramConnected}>
+            <Instagram />
+            <span>{isInstagramConnected ? 'Instagram Connected' : 'Connect Instagram'}</span>
+          </Button>
+          <Button onClick={onConnectGoogleDrive} variant="outline" className="w-full justify-start gap-2">
+            <FolderKanban />
+            <span>Connect Google Drive</span>
+          </Button>
+        </div>
       </SidebarFooter>
     </>
   );

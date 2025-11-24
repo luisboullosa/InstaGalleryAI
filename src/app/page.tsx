@@ -10,6 +10,7 @@ import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-imag
 import type { Critique, Theme } from '@/lib/types';
 import { Bot, GalleryHorizontal, Sparkles } from 'lucide-react';
 import CritiqueReport from './components/critique-report';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
   const [currentTheme, setCurrentTheme] = React.useState<Theme | null>(null);
@@ -17,6 +18,8 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = React.useState<ImagePlaceholder | null>(null);
   const [critiques, setCritiques] = React.useState<Critique[]>([]);
   const [isReportOpen, setReportOpen] = React.useState(false);
+  const [isInstagramConnected, setIsInstagramConnected] = React.useState(false);
+  const { toast } = useToast();
 
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
@@ -34,12 +37,32 @@ export default function Home() {
     setCritiques(prev => [...prev.filter(c => c.imageId !== critique.imageId), critique]);
   };
 
+  const handleConnectInstagram = () => {
+    // In a real app, this would trigger the OAuth flow.
+    // For now, we'll just simulate a successful connection.
+    setIsInstagramConnected(true);
+    toast({
+      title: 'Instagram Connected',
+      description: "You can now create galleries from your Instagram posts.",
+    })
+  };
+
+  const handleConnectGoogleDrive = () => {
+    toast({
+      title: 'Coming Soon!',
+      description: "Google Drive integration is not yet available.",
+    })
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar variant="sidebar" collapsible="icon">
         <AppSidebar
           onCreateGallery={handleCreateGallery}
           currentTheme={currentTheme}
+          isInstagramConnected={isInstagramConnected}
+          onConnectInstagram={handleConnectInstagram}
+          onConnectGoogleDrive={handleConnectGoogleDrive}
         />
       </Sidebar>
       <SidebarInset className="flex flex-col">

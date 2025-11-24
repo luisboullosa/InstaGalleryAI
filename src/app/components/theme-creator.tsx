@@ -4,12 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Sparkles, Wand2 } from 'lucide-react';
-import React, { useActionState } from 'react';
+import { Lock, Sparkles } from 'lucide-react';
+import React from 'react';
 import { useFormStatus } from 'react-dom';
 import { suggestThemesAction, type SuggestThemesState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import type { Theme } from '@/lib/types';
 import { Slider } from '@/components/ui/slider';
 import {
@@ -22,19 +21,19 @@ import {
 const initialState: SuggestThemesState = { status: 'idle' };
 const MOCK_POSTING_HISTORY = `A mix of urban exploration and nature photography. Lots of night shots in cities like Tokyo and New York, focusing on neon lights and reflections. Also includes landscape photos from hiking trips in the mountains, with a focus on dramatic sunsets and misty mornings. Some occasional portraits and abstract macro shots of flowers and insects. Style is often moody and atmospheric.`;
 
-function SubmitThemeButton() {
+function SubmitThemeButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="sm" className="w-full" disabled={pending}>
+    <Button type="submit" size="sm" className="w-full" disabled={disabled || pending}>
       {pending ? 'Creating...' : 'Create Gallery'}
     </Button>
   );
 }
 
-function SuggestThemesButton() {
+function SuggestThemesButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" variant="outline" size="sm" className="w-full" disabled={pending}>
+    <Button type="submit" variant="outline" size="sm" className="w-full" disabled={disabled || pending}>
       <Sparkles className="mr-2" />
       {pending ? 'Suggesting...' : 'Suggest Themes'}
     </Button>
@@ -43,11 +42,12 @@ function SuggestThemesButton() {
 
 type ThemeCreatorProps = {
   onCreateGallery: (theme: Theme) => void;
+  isInstagramConnected: boolean;
 };
 
-export function ThemeCreator({ onCreateGallery }: ThemeCreatorProps) {
+export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCreatorProps) {
   const [themeInput, setThemeInput] = React.useState('');
-  const [state, formAction] = useActionState(suggestThemesAction, initialState);
+  const [state, formAction] = React.useActionState(suggestThemesAction, initialState);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -68,6 +68,20 @@ export function ThemeCreator({ onCreateGallery }: ThemeCreatorProps) {
     }
   };
 
+  if (!isInstagramConnected) {
+    return (
+        <div className="space-y-4 rounded-lg border border-dashed p-4 text-center">
+            <div className="mx-auto w-fit rounded-full bg-secondary p-3">
+                <Lock className="text-muted-foreground" />
+            </div>
+            <h3 className="font-semibold">Connect an Account</h3>
+            <p className="text-sm text-muted-foreground">
+                Please connect your Instagram or Google Drive account to start creating galleries.
+            </p>
+        </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleUserThemeSubmit} className="space-y-2">
@@ -77,8 +91,9 @@ export function ThemeCreator({ onCreateGallery }: ThemeCreatorProps) {
           placeholder="e.g., 'Urban Noir' or 'Nature's Geometry'"
           value={themeInput}
           onChange={(e) => setThemeInput(e.target.value)}
+          disabled={!isInstagramConnected}
         />
-        <SubmitThemeButton />
+        <SubmitThemeButton disabled={!isInstagramConnected} />
       </form>
 
       <div className="relative">
@@ -98,8 +113,9 @@ export function ThemeCreator({ onCreateGallery }: ThemeCreatorProps) {
           className="bg-background/50 text-sm"
           rows={5}
           defaultValue={MOCK_POSTING_HISTORY}
+          disabled={!isInstagramConnected}
         />
-        <SuggestThemesButton />
+        <SuggestThemesButton disabled={!isInstagramConnected} />
       </form>
 
       {state.status === 'success' && state.suggestedThemes && (
@@ -132,7 +148,7 @@ export function ThemeCreator({ onCreateGallery }: ThemeCreatorProps) {
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
-        <Slider defaultValue={[50]} max={100} step={1} />
+        <Slider defaultValue={[50]} max={100} step={1} disabled={!isInstagramConnected} />
         <div className="flex justify-between text-xs text-muted-foreground">
             <span>Lenient</span>
             <span>Harsh</span>

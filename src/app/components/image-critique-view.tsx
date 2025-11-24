@@ -127,7 +127,7 @@ type ImageCritiqueViewProps = {
 };
 
 export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated }: ImageCritiqueViewProps) {
-  const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
+  const [state, formAction] = React.useActionState(getImageCritiqueAction, initialState);
   const { toast } = useToast();
   const formRef = React.useRef<HTMLFormElement>(null);
 
