@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Tag, ShieldQuestion, Swords, Scale } from 'lucide-react';
+import { Tag, ShieldQuestion, Swords, Scale, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
@@ -101,7 +101,16 @@ export default function CommunityPage() {
                     <Tabs defaultValue="explore">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="explore"><Swords className="mr-2" /> Explore Critiques</TabsTrigger>
-                            <TabsTrigger value="my-critiques"><Scale className="mr-2" /> My User Critiques</TabsTrigger>
+                            <TabsTrigger value="my-critiques" disabled>
+                                <div className="flex items-center gap-2">
+                                    <Scale />
+                                    <span>My User Critiques</span>
+                                    <Badge variant="secondary" className="gap-1 pl-2">
+                                        <Lock size={12} />
+                                        Pro
+                                    </Badge>
+                                </div>
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="explore" className="mt-4">
                             <Card>
@@ -129,7 +138,7 @@ export default function CommunityPage() {
                                 <CardContent>
                                     <div className="p-8 border rounded-lg bg-muted/50 text-center flex flex-col justify-center items-center">
                                         <p className="text-sm text-muted-foreground">When you request user critiques, they will appear here.</p>
-                                        <p className="text-xs text-muted-foreground mt-1">This feature is coming soon!</p>
+                                        <p className="text-xs text-muted-foreground mt-1">This is a pro feature!</p>
                                     </div>
                                 </CardContent>
                             </Card>
