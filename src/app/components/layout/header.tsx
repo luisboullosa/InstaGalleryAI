@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Theme } from '@/lib/types';
-import { FileText, Instagram, LogOut, Settings, User, Bot } from 'lucide-react';
+import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle } from 'lucide-react';
 
 type AppHeaderProps = {
   theme: Theme | null;
@@ -20,9 +20,10 @@ type AppHeaderProps = {
   hasCritiques: boolean;
   onCritiqueGallery: () => void;
   isGalleryCritiqueLoading: boolean;
+  onAddImages: () => void;
 };
 
-export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, isGalleryCritiqueLoading }: AppHeaderProps) {
+export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, isGalleryCritiqueLoading, onAddImages }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
@@ -37,21 +38,27 @@ export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery
           )}
         </h1>
       </div>
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex items-center gap-2">
         {theme && (
-            <Button variant="outline" size="sm" onClick={onCritiqueGallery} disabled={isGalleryCritiqueLoading}>
-              {isGalleryCritiqueLoading ? (
-                <>
-                  <Bot className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Bot className="mr-2 h-4 w-4" />
-                  Critique Gallery
-                </>
-              )}
-            </Button>
+            <>
+                <Button variant="outline" size="sm" onClick={onAddImages}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Images
+                </Button>
+                <Button variant="outline" size="sm" onClick={onCritiqueGallery} disabled={isGalleryCritiqueLoading}>
+                {isGalleryCritiqueLoading ? (
+                    <>
+                    <Bot className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing...
+                    </>
+                ) : (
+                    <>
+                    <Bot className="mr-2 h-4 w-4" />
+                    Critique Gallery
+                    </>
+                )}
+                </Button>
+            </>
         )}
         {hasCritiques && (
           <Button variant="outline" size="sm" onClick={onShowReport}>

@@ -32,18 +32,43 @@ export default function Home() {
 
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
+    setCritiques([]);
     // Mocking AI selection based on theme keywords and image hints
     const themeKeywords = theme.name.toLowerCase().split(' ');
     const filteredImages = PlaceHolderImages.filter(image => 
       themeKeywords.some(keyword => image.imageHint.includes(keyword))
     );
     // If no images match, show a random selection for demonstration
-    setGalleryImages(filteredImages.length > 0 ? filteredImages : PlaceHolderImages.slice(0, 9));
+    setGalleryImages(filteredImages.length > 0 ? filteredImages.slice(0, 9) : PlaceHolderImages.slice(0, 9));
     setSelectedImage(null);
   };
   
   const handleCritiqueGenerated = (critique: Critique) => {
     setCritiques(prev => [...prev.filter(c => c.imageId !== critique.imageId), critique]);
+  };
+
+  const handleImageRemove = (imageToRemove: ImagePlaceholder) => {
+    setGalleryImages(prev => prev.filter(img => img.id !== imageToRemove.id));
+    setCritiques(prev => prev.filter(c => c.imageId !== imageToRemove.id));
+  };
+
+  const handleAddImages = () => {
+    // This is a mock implementation. In a real app, this would open a picker.
+    const existingIds = new Set(galleryImages.map(img => img.id));
+    const newImages = PlaceHolderImages.filter(img => !existingIds.has(img)).slice(0, 3);
+    if (newImages.length > 0) {
+        setGalleryImages(prev => [...prev, ...newImages]);
+        toast({
+            title: 'Images Added',
+            description: `${newImages.length} new image(s) were added to the gallery.`,
+        });
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'No More Images',
+            description: 'There are no more unique images to add.',
+        });
+    }
   };
 
   const handleConnectInstagram = () => {
@@ -105,12 +130,14 @@ export default function Home() {
           hasCritiques={critiques.length > 0}
           onCritiqueGallery={handleCritiqueGallery}
           isGalleryCritiqueLoading={isGalleryCritiquePending}
+          onAddImages={handleAddImages}
         />
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           {galleryImages.length > 0 && currentTheme ? (
             <GalleryGrid
               images={galleryImages}
               onImageSelect={setSelectedImage}
+              onImageRemove={handleImageRemove}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
