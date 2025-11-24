@@ -135,8 +135,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
   
   const formRef = React.useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
-  const { pending } = useFormStatus();
-
+  
   const { toast } = useToast();
   
   const [critic, setCritic] = React.useState<Critic>(activeCritics[0]?.id || 'Default AI');
@@ -145,8 +144,6 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
     if (!image) return null;
     return critiques.find(c => c.imageId === image.id) || null;
   }, [critiques, image]);
-
-  const critiqueToShow = (state.status === 'success' && state.data?.imageId === image?.id) ? { ...state.data, imageId: image.id, artisticIntention: ''} : existingCritique;
 
   React.useEffect(() => {
     if (state.status === 'error' && state.error) {
@@ -169,18 +166,26 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
 
   React.useEffect(() => {
     if (image) {
-      // Reset form state when image changes
-      formRef.current?.reset();
-      const currentArtisticIntention = existingCritique?.artisticIntention || '';
-      if(formRef.current?.artisticIntention) {
-        formRef.current.artisticIntention.value = currentArtisticIntention;
+      // Reset form action state when image changes
+      const form = formRef.current;
+      if (form) {
+        form.reset();
+        // Manually set the intention textarea value from the existing critique if present
+        const intentionTextarea = form.elements.namedItem('artisticIntention') as HTMLTextAreaElement | null;
+        if (intentionTextarea) {
+            intentionTextarea.value = existingCritique?.artisticIntention || '';
+        }
       }
       
+      // Reset critic selection if current one isn't active
       if (activeCritics.length > 0 && !activeCritics.find(c => c.id === critic)) {
         setCritic(activeCritics[0].id);
       }
     }
   }, [image, existingCritique, activeCritics, critic]);
+
+  // Determine what to display
+  const critiqueToShow = existingCritique;
   
   const handleDeleteCritique = () => {
     if (image) {
@@ -256,13 +261,13 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                         
                         <Separator />
 
-                        {pending && <CritiqueSkeleton />}
+                        {state.status === 'loading' && <CritiqueSkeleton />}
                     
-                        {critiqueToShow && !pending && (
+                        {critiqueToShow && state.status !== 'loading' && (
                             <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
                         )}
 
-                        {!critiqueToShow && !pending && (
+                        {!critiqueToShow && state.status !== 'loading' && (
                             <div className="text-center text-muted-foreground py-8">
                                 <Bot size={32} className="mx-auto" />
                                 <p className="mt-2 text-sm">Generate an AI critique for this image.</p>
@@ -274,3 +279,5 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
     </div>
   );
 }
+
+    
