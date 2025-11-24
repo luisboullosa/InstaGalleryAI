@@ -33,21 +33,30 @@ export default function Home() {
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
     setCritiques([]);
-    
+  
     const themeKeywords = theme.name.toLowerCase().split(' ');
-    let filteredImages = PlaceHolderImages.filter(image => 
-      themeKeywords.some(keyword => image.imageHint.includes(keyword))
-    );
-
-    // If no images match the keywords, get a random slice of images
-    if (filteredImages.length === 0) {
-      filteredImages = [...PlaceHolderImages].sort(() => 0.5 - Math.random()).slice(0, 9);
-    }
     
-    // Robust de-duplication using a Map to ensure unique IDs
-    const uniqueImages = Array.from(new Map(filteredImages.map(image => [image.id, image])).values());
-
-    setGalleryImages(uniqueImages.slice(0, 15));
+    // Use a Map to ensure uniqueness from the start.
+    const imageMap = new Map<string, ImagePlaceholder>();
+  
+    // Add images that match the theme keywords.
+    PlaceHolderImages.forEach(image => {
+      const hint = image.imageHint.toLowerCase();
+      if (themeKeywords.some(keyword => hint.includes(keyword))) {
+        imageMap.set(image.id, image);
+      }
+    });
+  
+    let finalImages = Array.from(imageMap.values());
+  
+    // If keyword search yields no results, populate with random images.
+    if (finalImages.length === 0) {
+      const shuffled = [...PlaceHolderImages].sort(() => 0.5 - Math.random());
+      finalImages = shuffled.slice(0, 9);
+    }
+  
+    // Limit to a maximum of 15 images.
+    setGalleryImages(finalImages.slice(0, 15));
     setSelectedImage(null);
   };
   
@@ -62,7 +71,7 @@ export default function Home() {
 
   const handleAddImages = () => {
     const existingIds = new Set(galleryImages.map(img => img.id));
-    const availableImages = PlaceHolderImages.filter(img => !existingIds.has(img));
+    const availableImages = PlaceHolderImages.filter(img => !existingIds.has(img.id));
     
     if (availableImages.length === 0) {
         toast({
