@@ -4,7 +4,6 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/app/context/app-provider';
-import { SidebarProvider } from '@/components/ui/sidebar';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -33,9 +32,7 @@ export default function RootLayout({
         )}
       >
         <AppProvider>
-          <SidebarProvider>
-            {children}
-          </SidebarProvider>
+          {children}
         </AppProvider>
         <Toaster />
       </body>

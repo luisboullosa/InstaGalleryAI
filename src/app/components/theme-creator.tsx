@@ -70,9 +70,9 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
 
   if (!isInstagramConnected) {
     return (
-        <div className="space-y-4 rounded-lg border border-dashed p-4 text-center">
-            <div className="mx-auto w-fit rounded-full bg-secondary p-3">
-                <Lock className="text-muted-foreground" />
+        <div className="space-y-4 rounded-lg border border-dashed border-sidebar-border p-4 text-center">
+            <div className="mx-auto w-fit rounded-full bg-sidebar-accent p-3">
+                <Lock className="text-sidebar-accent-foreground" />
             </div>
             <h3 className="font-semibold">Connect an Account</h3>
             <p className="text-sm text-muted-foreground">
@@ -88,7 +88,7 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
         <Label htmlFor="theme-input">Enter a Theme</Label>
         <Input
           id="theme-input"
-          placeholder="e.g., 'Urban Noir' or 'Nature's Geometry'"
+          placeholder="e.g., 'Urban Noir'"
           value={themeInput}
           onChange={(e) => setThemeInput(e.target.value)}
           disabled={!isInstagramConnected}
@@ -98,7 +98,7 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
+          <span className="w-full border-t border-sidebar-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-sidebar px-2 text-muted-foreground">Or</span>
@@ -110,7 +110,7 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
         <Textarea
           id="posting-history"
           name="postingHistory"
-          className="bg-background/50 text-sm"
+          className="bg-sidebar-background text-sm"
           rows={5}
           defaultValue={MOCK_POSTING_HISTORY}
           disabled={!isInstagramConnected}

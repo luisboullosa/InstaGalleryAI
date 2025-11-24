@@ -4,17 +4,21 @@ import * as React from 'react';
 import { useActionState, useTransition } from 'react';
 import { AppSidebar } from '@/app/components/layout/sidebar';
 import { AppHeader } from '@/app/components/layout/header';
-import { Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import GalleryGrid from '@/app/components/gallery-grid';
 import ImageCritiqueView from '@/app/components/image-critique-view';
 import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
-import type { Critique, Theme, SavedGallery } from '@/lib/types';
+import type { Critique, Theme } from '@/lib/types';
 import { Bot, GalleryHorizontal, Sparkles } from 'lucide-react';
 import CritiqueReport from './components/critique-report';
 import GalleryCritiqueReport from './components/gallery-critique-report';
 import { useToast } from '@/hooks/use-toast';
 import { getGalleryCritiqueAction, type GalleryCritiqueState } from '@/app/actions';
 import { useApp } from './context/app-provider';
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 const initialGalleryCritiqueState: GalleryCritiqueState = { status: 'idle' };
 
@@ -146,61 +150,71 @@ export default function Home() {
   }, [galleryCritiqueState, toast]);
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar variant="sidebar" collapsible="icon">
-        <AppSidebar
-          onCreateGallery={handleCreateGallery}
-          currentTheme={currentTheme}
-          isInstagramConnected={isInstagramConnected}
-          onConnectInstagram={handleConnectInstagram}
-          onConnectGoogleDrive={handleConnectGoogleDrive}
-          savedGalleries={savedGalleries}
-          onSelectGallery={handleSelectGallery}
-        />
-      </Sidebar>
-      <SidebarInset className="flex flex-col">
-        <AppHeader 
-          theme={currentTheme} 
-          onShowReport={() => setReportOpen(true)}
-          hasCritiques={critiques.length > 0}
-          onCritiqueGallery={handleCritiqueGallery}
-          isGalleryCritiqueLoading={isGalleryCritiquePending}
-          onAddImages={handleAddImages}
-          onSaveGallery={() => currentTheme && handleSaveGallery(currentTheme, galleryImages, critiques)}
-          onExport={handleExport}
-        />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
-          {galleryImages.length > 0 && currentTheme ? (
-            <GalleryGrid
-              images={galleryImages}
-              onImageSelect={setSelectedImage}
-              onImageRemove={handleImageRemove}
+    <ResizablePanelGroup direction="horizontal" className="flex min-h-screen">
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={25} collapsible>
+          <AppSidebar
+            onCreateGallery={handleCreateGallery}
+            currentTheme={currentTheme}
+            isInstagramConnected={isInstagramConnected}
+            onConnectInstagram={handleConnectInstagram}
+            onConnectGoogleDrive={handleConnectGoogleDrive}
+            savedGalleries={savedGalleries}
+            onSelectGallery={handleSelectGallery}
+          />
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={selectedImage ? 50 : 80}>
+          <div className="flex flex-col h-full">
+            <AppHeader 
+              theme={currentTheme} 
+              onShowReport={() => setReportOpen(true)}
+              hasCritiques={critiques.length > 0}
+              onCritiqueGallery={handleCritiqueGallery}
+              isGalleryCritiqueLoading={isGalleryCritiquePending}
+              onAddImages={handleAddImages}
+              onSaveGallery={() => currentTheme && handleSaveGallery(currentTheme, galleryImages, critiques)}
+              onExport={handleExport}
             />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-              <div className="p-6 border-2 border-dashed rounded-full border-muted mb-4">
-                <GalleryHorizontal size={48} />
-              </div>
-              <h2 className="text-2xl font-semibold text-foreground">Welcome to InstaGalleryAI</h2>
-              <p className="max-w-md mt-2">
-                Your personal AI gallery curator. To begin, create a new themed gallery using the options in the sidebar.
-              </p>
-              <div className="flex gap-4 mt-4 text-sm">
-                <div className="flex items-center gap-2"><Sparkles className="text-primary"/> AI Theme Suggestions</div>
-                <div className="flex items-center gap-2"><Bot className="text-primary" /> AI Image Critiques</div>
-              </div>
-            </div>
-          )}
-        </main>
-      </SidebarInset>
+            <main className="flex-1 p-4 md:p-6 overflow-auto">
+              {galleryImages.length > 0 && currentTheme ? (
+                <GalleryGrid
+                  images={galleryImages}
+                  onImageSelect={setSelectedImage}
+                  onImageRemove={handleImageRemove}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                  <div className="p-6 border-2 border-dashed rounded-full border-muted mb-4">
+                    <GalleryHorizontal size={48} />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-foreground">Welcome to InstaGalleryAI</h2>
+                  <p className="max-w-md mt-2">
+                    Your personal AI gallery curator. To begin, create a new themed gallery using the options in the sidebar.
+                  </p>
+                  <div className="flex gap-4 mt-4 text-sm">
+                    <div className="flex items-center gap-2"><Sparkles className="text-primary"/> AI Theme Suggestions</div>
+                    <div className="flex items-center gap-2"><Bot className="text-primary" /> AI Image Critiques</div>
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+      </ResizablePanel>
 
-      <ImageCritiqueView
-        image={selectedImage}
-        theme={currentTheme}
-        onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}
-        onCritiqueGenerated={handleCritiqueGenerated}
-        onCritiqueDeleted={handleCritiqueDeleted}
-      />
+      {selectedImage && (
+        <>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={30} minSize={25} collapsible>
+            <ImageCritiqueView
+              image={selectedImage}
+              theme={currentTheme}
+              onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}
+              onCritiqueGenerated={handleCritiqueGenerated}
+              onCritiqueDeleted={handleCritiqueDeleted}
+            />
+          </ResizablePanel>
+        </>
+      )}
 
       <CritiqueReport
         isOpen={isReportOpen}
@@ -215,6 +229,6 @@ export default function Home() {
         critique={galleryCritiqueState.status === 'success' ? galleryCritiqueState.data : null}
         theme={currentTheme}
       />
-    </div>
+    </ResizablePanelGroup>
   );
 }

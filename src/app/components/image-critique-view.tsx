@@ -3,14 +3,6 @@
 import * as React from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@/components/ui/sheet';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -27,17 +19,18 @@ import { getImageCritiqueAction, type CritiqueState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { type ImagePlaceholder } from '@/lib/placeholder-images';
 import type { Critique, Theme, Critic } from '@/lib/types';
-import { Bot, CheckCircle2, Wand2, XCircle, Users, Trash2 } from 'lucide-react';
+import { Bot, CheckCircle2, Wand2, XCircle, Users, Trash2, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '../context/app-provider';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 const initialState: CritiqueState = { status: 'idle' };
 
 function SubmitCritiqueButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+    <Button type="submit" disabled={pending} className="w-full">
       {pending ? (
         <>
           <Bot className="mr-2 animate-spin" />
@@ -153,7 +146,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
     return critiques.find(c => c.imageId === image.id) || null;
   }, [critiques, image]);
 
-  const critiqueToShow = state.status === 'success' && state.data && image?.id === state.data.imageId ? { ...state.data, imageId: image.id, artisticIntention: ''} : existingCritique;
+  const critiqueToShow = (state.status === 'success' && state.data?.imageId === image?.id) ? { ...state.data, imageId: image.id, artisticIntention: ''} : existingCritique;
 
   React.useEffect(() => {
     if (state.status === 'error' && state.error) {
@@ -164,11 +157,13 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
       });
     }
     if (state.status === 'success' && state.data && image) {
-      onCritiqueGenerated({
-          ...state.data,
-          imageId: image.id,
-          artisticIntention: formRef.current?.artisticIntention.value || ''
-      });
+        if (state.data.imageId === image.id) {
+             onCritiqueGenerated({
+                ...state.data,
+                imageId: image.id,
+                artisticIntention: formRef.current?.artisticIntention.value || ''
+            });
+        }
     }
   }, [state, toast, image, onCritiqueGenerated]);
 
@@ -196,36 +191,38 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
       })
     }
   }
+
+  if (!image) {
+    return (
+        <div className="flex h-full items-center justify-center bg-muted/50 text-muted-foreground">
+            Select an image to view details.
+        </div>
+    );
+  }
   
   return (
-    <Sheet open={!!image} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col p-0">
-        {image && (
-          <>
-            <SheetHeader className="p-6 pb-2">
-              <SheetTitle>AI-Powered Critique</SheetTitle>
-              <SheetDescription>
-                Get feedback on your image from a council of AI critics.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
-                <div className="relative rounded-lg overflow-hidden m-6 mb-0 lg:m-0 lg:ml-6 lg:mb-6">
+    <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="font-semibold text-lg">Image Details</h2>
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-7 w-7">
+                <X size={16} />
+            </Button>
+        </div>
+        <ScrollArea className="flex-1">
+            <div className="p-4">
+                <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
                     <Image
                         src={image.imageUrl}
                         alt={image.description}
                         fill
-                        className="object-contain"
-                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover"
+                        sizes="30vw"
                     />
                 </div>
-                
-                <ScrollArea className="flex flex-col gap-4">
-                  <div className="p-6 pt-0 lg:pt-6">
-                    <form action={formAction} ref={formRef} className="space-y-4">
+                 <form action={formAction} ref={formRef} className="space-y-4">
                         <input type="hidden" name="imageUrl" value={image.imageUrl} />
                         <input type="hidden" name="imageId" value={image.id} />
                         <input type="hidden" name="theme" value={theme?.name || 'General'} />
-                        <input type="hidden" name="critic" value={critic} />
 
                         <div className="space-y-2">
                             <Label htmlFor="artistic-intention">Artistic Intention</Label>
@@ -253,22 +250,27 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                           </Select>
                         </div>
                         
-                        <SheetFooter className="!flex-col sm:!flex-row">
+                        <div>
                             <SubmitCritiqueButton />
-                        </SheetFooter>
+                        </div>
+                        
+                        <Separator />
 
                         {pending && <CritiqueSkeleton />}
                     
                         {critiqueToShow && !pending && (
                             <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
                         )}
+
+                        {!critiqueToShow && !pending && (
+                            <div className="text-center text-muted-foreground py-8">
+                                <Bot size={32} className="mx-auto" />
+                                <p className="mt-2 text-sm">Generate an AI critique for this image.</p>
+                            </div>
+                        )}
                     </form>
-                  </div>
-                </ScrollArea>
             </div>
-          </>
-        )}
-      </SheetContent>
-    </Sheet>
+        </ScrollArea>
+    </div>
   );
 }

@@ -12,10 +12,11 @@ import {
 import { Logo } from '@/components/logo';
 import { ThemeCreator } from '@/app/components/theme-creator';
 import type { Theme, SavedGallery } from '@/lib/types';
-import { Bell, Home, Instagram, FolderKanban, Library, Users } from 'lucide-react';
+import { Home, Instagram, FolderKanban, Library, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type AppSidebarProps = {
   onCreateGallery: (theme: Theme) => void;
@@ -40,13 +41,16 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
           <span className="text-lg font-semibold">InstaGalleryAI</span>
         </div>
       </SidebarHeader>
+      <ScrollArea>
+        <div className="p-2">
+          <ThemeCreator onCreateGallery={onCreateGallery} isInstagramConnected={isInstagramConnected} />
+        </div>
 
-      <SidebarContent className="p-2">
-        {isHomePage && <ThemeCreator onCreateGallery={onCreateGallery} isInstagramConnected={isInstagramConnected} />}
-        <SidebarSeparator className="my-4" />
+        <SidebarSeparator className="my-2" />
+        
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/">
+            <Link href="/" className="w-full">
                 <SidebarMenuButton tooltip="Dashboard" isActive={isHomePage && !currentTheme}>
                     <Home />
                     <span>Dashboard</span>
@@ -55,7 +59,7 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
           </SidebarMenuItem>
           {savedGalleries.length > 0 && (
             <SidebarMenuItem>
-                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground">My Galleries</h3>
+                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground/80">My Galleries</h3>
                 {savedGalleries.map(gallery => (
                     <SidebarMenuButton 
                         key={gallery.id}
@@ -70,8 +74,8 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
             </SidebarMenuItem>
           )}
            <SidebarMenuItem>
-                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground">Settings</h3>
-                 <Link href="/agents">
+                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground/80">Settings</h3>
+                 <Link href="/agents" className="w-full">
                     <SidebarMenuButton tooltip="Agents" isActive={pathname === '/agents'}>
                         <Users />
                         <span>Agents</span>
@@ -79,7 +83,7 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
                 </Link>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarContent>
+      </ScrollArea>
 
       <SidebarFooter>
         <div className="space-y-2 p-2">
