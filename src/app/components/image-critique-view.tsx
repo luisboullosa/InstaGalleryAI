@@ -140,7 +140,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
   const { agents, critiques } = useApp();
   const activeCritics = React.useMemo(() => Object.values(agents).filter(a => a.active), [agents]);
 
-  const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
+  const [state, formAction, isPending] = useActionState(getImageCritiqueAction, initialState);
   const { toast } = useToast();
   const formRef = React.useRef<HTMLFormElement>(null);
   
@@ -170,27 +170,15 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
 
   React.useEffect(() => {
     if (image) {
-        // Do not reset the entire form state, just the action state
-        const mutableInitialState = state as CritiqueState;
-        mutableInitialState.status = 'idle';
-        delete mutableInitialState.data;
-        delete mutableInitialState.error;
-
-
       if (activeCritics.length > 0 && !activeCritics.find(c => c.id === critic)) {
         setCritic(activeCritics[0].id);
       }
     }
-  }, [image, activeCritics, critic, state]);
+  }, [image, activeCritics, critic]);
   
   const handleDeleteCritique = () => {
     if (image) {
       onCritiqueDeleted(image.id);
-      // Also reset the form action state
-      const mutableInitialState = state as CritiqueState;
-      mutableInitialState.status = 'idle';
-      delete mutableInitialState.data;
-
       toast({
         title: "Critique Deleted",
         description: "The critique for this image has been removed."
@@ -198,7 +186,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
     }
   }
 
-  const currentCritiqueData = state.status === 'success' ? state.data : existingCritique;
+  const critiqueToShow = state.status === 'success' ? state.data : existingCritique;
   
   return (
     <Sheet open={!!image} onOpenChange={onOpenChange}>
@@ -261,10 +249,10 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                         </SheetFooter>
                     </form>
                     
-                    {state.status === 'loading' && <CritiqueSkeleton />}
+                    {isPending && <CritiqueSkeleton />}
                     
-                    {currentCritiqueData && state.status !== 'loading' && (
-                        <CritiqueResult critique={currentCritiqueData} onDelete={handleDeleteCritique} />
+                    {critiqueToShow && !isPending && (
+                        <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
                     )}
                   </div>
                 </ScrollArea>
