@@ -1,30 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Bot, BookOpen, Lightbulb, TrendingUp, Users } from 'lucide-react';
+import { BookOpen, Lightbulb, TrendingUp, Users } from 'lucide-react';
 import type { ProvideAiPoweredGalleryCritiqueOutput } from '@/ai/flows/provide-ai-powered-gallery-critique';
 import type { Theme } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type GalleryCritiqueReportProps = {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
   critique: ProvideAiPoweredGalleryCritiqueOutput | null;
   theme: Theme | null;
 };
@@ -40,6 +25,7 @@ const criticInitials: Record<string, string> = {
 }
 
 function CritiqueSection({ title, icon, sections }: { title: string, icon: React.ReactNode, sections: {critic: string, statement: string}[] }) {
+    if (!sections || sections.length === 0) return null;
     return (
         <Card>
             <CardHeader>
@@ -93,42 +79,30 @@ function ReportSkeleton() {
 }
 
 export default function GalleryCritiqueReport({
-  isOpen,
-  onOpenChange,
   critique,
   theme
 }: GalleryCritiqueReportProps) {
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col p-0">
-        <SheetHeader className="p-6 pb-2">
-          <SheetTitle>Gallery Critique: <span className="font-normal">{theme?.name}</span></SheetTitle>
-          <SheetDescription>
-            The AI Council of Critics has reviewed your gallery. Here is their feedback.
-          </SheetDescription>
-        </SheetHeader>
-        <ScrollArea className="flex-1">
-          <div className="p-6 pt-4">
-            {!critique ? <ReportSkeleton /> : (
-                <div className="space-y-6">
-                    <CritiqueSection title="Overall Assessment" icon={<Users size={20} />} sections={critique.overallAssessment} />
-                    <CritiqueSection title="Curation & Coherence" icon={<BookOpen size={20} />} sections={critique.curationAndCoherence} />
-                    <CritiqueSection title="Emerging Threads" icon={<TrendingUp size={20} />} sections={critique.emergingThreads} />
-                    <CritiqueSection title="Future Development" icon={<Lightbulb size={20} />} sections={critique.futureDevelopment} />
+    <ScrollArea className="flex-1">
+        <div className="p-4">
+        {!critique ? <ReportSkeleton /> : (
+            <div className="space-y-6">
+                <CritiqueSection title="Overall Assessment" icon={<Users size={20} />} sections={critique.overallAssessment} />
+                <CritiqueSection title="Curation & Coherence" icon={<BookOpen size={20} />} sections={critique.curationAndCoherence} />
+                <CritiqueSection title="Emerging Threads" icon={<TrendingUp size={20} />} sections={critique.emergingThreads} />
+                <CritiqueSection title="Future Development" icon={<Lightbulb size={20} />} sections={critique.futureDevelopment} />
 
-                    <div className="pt-4">
-                        <h3 className="text-lg font-semibold mb-2">Discuss with the Council</h3>
-                        <div className="p-4 border rounded-lg bg-muted/50 text-center">
-                            <p className="text-sm text-muted-foreground">This feature is coming soon!</p>
-                            <p className="text-xs text-muted-foreground mt-1">You'll be able to ask follow-up questions to the critics.</p>
-                        </div>
+                <div className="pt-4">
+                    <h3 className="text-lg font-semibold mb-2">Discuss with the Council</h3>
+                    <div className="p-4 border rounded-lg bg-muted/50 text-center">
+                        <p className="text-sm text-muted-foreground">This feature is coming soon!</p>
+                        <p className="text-xs text-muted-foreground mt-1">You'll be able to ask follow-up questions to the critics.</p>
                     </div>
                 </div>
-            )}
-          </div>
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+            </div>
+        )}
+        </div>
+    </ScrollArea>
   );
 }

@@ -8,7 +8,7 @@ import GalleryGrid from '@/app/components/gallery-grid';
 import ImageCritiqueView from '@/app/components/image-critique-view';
 import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
 import type { Critique, Theme } from '@/lib/types';
-import { Bot, GalleryHorizontal, Sparkles } from 'lucide-react';
+import { Bot, GalleryHorizontal, Sparkles, X } from 'lucide-react';
 import CritiqueReport from './components/critique-report';
 import GalleryCritiqueReport from './components/gallery-critique-report';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Button } from '@/components/ui/button';
 
 const initialGalleryCritiqueState: GalleryCritiqueState = { status: 'idle' };
 
@@ -39,41 +40,39 @@ export default function Home() {
 
   const [selectedImage, setSelectedImage] = React.useState<ImagePlaceholder | null>(null);
   const [isReportOpen, setReportOpen] = React.useState(false);
-  const [isGalleryReportOpen, setGalleryReportOpen] = React.useState(false);
+  const [showGalleryCritique, setShowGalleryCritique] = React.useState(false);
   
   const { toast } = useToast();
 
   const [galleryCritiqueState, galleryCritiqueAction] = useActionState(getGalleryCritiqueAction, initialGalleryCritiqueState);
   const [isGalleryCritiquePending, startGalleryCritiqueTransition] = useTransition();
+  
+  const detailViewActive = !!selectedImage || showGalleryCritique;
 
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
     setCritiques([]);
-  
-    const themeKeywords = theme.name.toLowerCase().split(' ');
     
-    // Use a Map to ensure uniqueness from the start.
     const imageMap = new Map<string, ImagePlaceholder>();
-  
-    // Add images that match the theme keywords.
+    const themeKeywords = theme.name.toLowerCase().split(' ');
+
     PlaceHolderImages.forEach(image => {
-      const hint = image.imageHint.toLowerCase();
-      if (themeKeywords.some(keyword => hint.includes(keyword))) {
-        imageMap.set(image.id, image);
-      }
+        const hint = image.imageHint.toLowerCase();
+        if (themeKeywords.some(keyword => hint.includes(keyword))) {
+            imageMap.set(image.id, image);
+        }
     });
-  
+
     let finalImages = Array.from(imageMap.values());
-  
-    // If keyword search yields no results, populate with random images.
+    
     if (finalImages.length === 0) {
       const shuffled = [...PlaceHolderImages].sort(() => 0.5 - Math.random());
       finalImages = shuffled.slice(0, 9);
     }
   
-    // Limit to a maximum of 15 images.
     setGalleryImages(finalImages.slice(0, 15));
     setSelectedImage(null);
+    setShowGalleryCritique(false);
   };
   
   const handleCritiqueGenerated = (critique: Critique) => {
@@ -135,10 +134,21 @@ export default function Home() {
         description: 'The export feature is under development.',
     });
   }
+  
+  const handleImageSelect = (image: ImagePlaceholder) => {
+    setSelectedImage(image);
+    setShowGalleryCritique(false);
+  }
+  
+  const handleCloseDetailView = () => {
+    setSelectedImage(null);
+    setShowGalleryCritique(false);
+  }
 
   React.useEffect(() => {
     if (galleryCritiqueState.status === 'success' && galleryCritiqueState.data) {
-        setGalleryReportOpen(true);
+        setShowGalleryCritique(true);
+        setSelectedImage(null);
     }
     if (galleryCritiqueState.status === 'error' && galleryCritiqueState.error) {
         toast({
@@ -163,7 +173,7 @@ export default function Home() {
           />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={selectedImage ? 50 : 80}>
+      <ResizablePanel defaultSize={detailViewActive ? 50 : 80}>
           <div className="flex flex-col h-full">
             <AppHeader 
               theme={currentTheme} 
@@ -179,7 +189,7 @@ export default function Home() {
               {galleryImages.length > 0 && currentTheme ? (
                 <GalleryGrid
                   images={galleryImages}
-                  onImageSelect={setSelectedImage}
+                  onImageSelect={handleImageSelect}
                   onImageRemove={handleImageRemove}
                 />
               ) : (
@@ -201,17 +211,34 @@ export default function Home() {
           </div>
       </ResizablePanel>
 
-      {selectedImage && (
+      {detailViewActive && (
         <>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={25} collapsible>
-            <ImageCritiqueView
-              image={selectedImage}
-              theme={currentTheme}
-              onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}
-              onCritiqueGenerated={handleCritiqueGenerated}
-              onCritiqueDeleted={handleCritiqueDeleted}
-            />
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b">
+                  <h2 className="font-semibold text-lg">
+                      {showGalleryCritique ? "Gallery Critique" : "Image Details"}
+                  </h2>
+                  <Button variant="ghost" size="icon" onClick={handleCloseDetailView} className="h-7 w-7">
+                      <X size={16} />
+                  </Button>
+              </div>
+              
+              {showGalleryCritique ? (
+                <GalleryCritiqueReport
+                  critique={galleryCritiqueState.status === 'success' ? galleryCritiqueState.data : null}
+                  theme={currentTheme}
+                />
+              ) : (
+                <ImageCritiqueView
+                  image={selectedImage}
+                  theme={currentTheme}
+                  onCritiqueGenerated={handleCritiqueGenerated}
+                  onCritiqueDeleted={handleCritiqueDeleted}
+                />
+              )}
+            </div>
           </ResizablePanel>
         </>
       )}
@@ -221,13 +248,6 @@ export default function Home() {
         onOpenChange={setReportOpen}
         critiques={critiques}
         images={PlaceHolderImages}
-      />
-
-      <GalleryCritiqueReport
-        isOpen={isGalleryReportOpen}
-        onOpenChange={setGalleryReportOpen}
-        critique={galleryCritiqueState.status === 'success' ? galleryCritiqueState.data : null}
-        theme={currentTheme}
       />
     </ResizablePanelGroup>
   );

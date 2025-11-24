@@ -19,7 +19,7 @@ import { getImageCritiqueAction, type CritiqueState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { type ImagePlaceholder } from '@/lib/placeholder-images';
 import type { Critique, Theme, Critic } from '@/lib/types';
-import { Bot, CheckCircle2, Wand2, XCircle, Users, Trash2, X } from 'lucide-react';
+import { Bot, CheckCircle2, Wand2, XCircle, Users, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '../context/app-provider';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -124,12 +124,11 @@ function CritiqueSkeleton() {
 type ImageCritiqueViewProps = {
   image: ImagePlaceholder | null;
   theme: Theme | null;
-  onOpenChange: (isOpen: boolean) => void;
   onCritiqueGenerated: (critique: Critique) => void;
   onCritiqueDeleted: (imageId: string) => void;
 };
 
-export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated, onCritiqueDeleted }: ImageCritiqueViewProps) {
+export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, onCritiqueDeleted }: ImageCritiqueViewProps) {
   const { agents, critiques } = useApp();
   const activeCritics = React.useMemo(() => Object.values(agents).filter(a => a.active), [agents]);
   
@@ -206,78 +205,68 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
   }
   
   return (
-    <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="font-semibold text-lg">Image Details</h2>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-7 w-7">
-                <X size={16} />
-            </Button>
-        </div>
-        <ScrollArea className="flex-1">
-            <div className="p-4">
-                <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
-                    <Image
-                        src={image.imageUrl}
-                        alt={image.description}
-                        fill
-                        className="object-cover"
-                        sizes="30vw"
-                    />
-                </div>
-                 <form action={formAction} ref={formRef} className="space-y-4">
-                        <input type="hidden" name="imageUrl" value={image.imageUrl} />
-                        <input type="hidden" name="imageId" value={image.id} />
-                        <input type="hidden" name="theme" value={theme?.name || 'General'} />
-
-                        <div className="space-y-2">
-                            <Label htmlFor="artistic-intention">Artistic Intention</Label>
-                            <Textarea
-                                id="artistic-intention"
-                                name="artisticIntention"
-                                placeholder="e.g., 'Capture the feeling of loneliness in a bustling city...'"
-                                defaultValue={existingCritique?.artisticIntention || ''}
-                                required
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Council of Critics</Label>
-                          <Select name="critic" value={critic} onValueChange={(value) => setCritic(value as Critic)}>
-                              <SelectTrigger>
-                                <Users className="mr-2" />
-                                <SelectValue placeholder="Select a critic..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {activeCritics.map((agent) => (
-                                    <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                            <SubmitCritiqueButton />
-                        </div>
-                        
-                        <Separator />
-
-                        {state.status === 'loading' && <CritiqueSkeleton />}
-                    
-                        {critiqueToShow && state.status !== 'loading' && (
-                            <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
-                        )}
-
-                        {!critiqueToShow && state.status !== 'loading' && (
-                            <div className="text-center text-muted-foreground py-8">
-                                <Bot size={32} className="mx-auto" />
-                                <p className="mt-2 text-sm">Generate an AI critique for this image.</p>
-                            </div>
-                        )}
-                    </form>
+    <ScrollArea className="flex-1">
+        <div className="p-4">
+            <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
+                <Image
+                    src={image.imageUrl}
+                    alt={image.description}
+                    fill
+                    className="object-cover"
+                    sizes="30vw"
+                />
             </div>
-        </ScrollArea>
-    </div>
+             <form action={formAction} ref={formRef} className="space-y-4">
+                    <input type="hidden" name="imageUrl" value={image.imageUrl} />
+                    <input type="hidden" name="imageId" value={image.id} />
+                    <input type="hidden" name="theme" value={theme?.name || 'General'} />
+
+                    <div className="space-y-2">
+                        <Label htmlFor="artistic-intention">Artistic Intention</Label>
+                        <Textarea
+                            id="artistic-intention"
+                            name="artisticIntention"
+                            placeholder="e.g., 'Capture the feeling of loneliness in a bustling city...'"
+                            defaultValue={existingCritique?.artisticIntention || ''}
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Council of Critics</Label>
+                      <Select name="critic" value={critic} onValueChange={(value) => setCritic(value as Critic)}>
+                          <SelectTrigger>
+                            <Users className="mr-2" />
+                            <SelectValue placeholder="Select a critic..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {activeCritics.map((agent) => (
+                                <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                        <SubmitCritiqueButton />
+                    </div>
+                    
+                    <Separator />
+
+                    {state.status === 'loading' && <CritiqueSkeleton />}
+                
+                    {critiqueToShow && state.status !== 'loading' && (
+                        <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
+                    )}
+
+                    {!critiqueToShow && state.status !== 'loading' && (
+                        <div className="text-center text-muted-foreground py-8">
+                            <Bot size={32} className="mx-auto" />
+                            <p className="mt-2 text-sm">Generate an AI critique for this image.</p>
+                        </div>
+                    )}
+                </form>
+        </div>
+    </ScrollArea>
   );
 }
-
-    
