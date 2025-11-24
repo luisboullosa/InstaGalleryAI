@@ -52,7 +52,9 @@ export default function Home() {
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
     setCritiques([]);
-    galleryCritiqueAction({type: 'reset'}); // Reset gallery critique state
+    React.startTransition(() => {
+        galleryCritiqueAction({type: 'reset'}); // Reset gallery critique state
+    });
     
     const imageMap = new Map<string, ImagePlaceholder>();
     const themeKeywords = theme.name.toLowerCase().split(' ');
@@ -140,7 +142,9 @@ export default function Home() {
   }
   
   const handleDeleteGalleryCritique = () => {
-    galleryCritiqueAction({type: 'reset'});
+    React.startTransition(() => {
+        galleryCritiqueAction({type: 'reset'});
+    });
     setShowGalleryCritique(false);
     toast({
       title: 'Gallery Critique Deleted',
@@ -189,7 +193,9 @@ export default function Home() {
   // When selecting a saved gallery, reset the critique state
   const handleSelectAndReset = (gallery: any) => {
     handleSelectGallery(gallery);
-    galleryCritiqueAction({type: 'reset'});
+    React.startTransition(() => {
+      galleryCritiqueAction({type: 'reset'});
+    });
   }
 
   return (
