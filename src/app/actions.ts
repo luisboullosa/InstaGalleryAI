@@ -3,7 +3,9 @@
 import { z } from 'zod';
 import { suggestThemes as suggestThemesFlow } from '@/ai/flows/suggest-themes-based-on-history';
 import { provideAiPoweredImageCritique as provideAiPoweredImageCritiqueFlow } from '@/ai/flows/provide-ai-powered-image-critique';
+import { provideAiPoweredGalleryCritique as provideAiPoweredGalleryCritiqueFlow } from '@/ai/flows/provide-ai-powered-gallery-critique';
 import { CriticSchema } from '@/lib/types';
+import type { ImagePlaceholder } from '@/lib/placeholder-images';
 
 export type SuggestThemesState = {
   status: 'success' | 'error' | 'idle';
@@ -91,5 +93,59 @@ export async function getImageCritiqueAction(prevState: CritiqueState, formData:
         console.error(error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { status: 'error', error: `Failed to generate critique: ${errorMessage}` };
+    }
+}
+
+
+export type GalleryCritiqueState = {
+  status: 'success' | 'error' | 'idle' | 'loading';
+  data?: Awaited<ReturnType<typeof provideAiPoweredGalleryCritiqueFlow>>;
+  error?: string;
+}
+
+const galleryCritiqueSchema = z.object({
+  theme: z.string(),
+  images: z.string(), // JSON string of ImagePlaceholder[]
+});
+
+export async function getGalleryCritiqueAction(prevState: GalleryCritiqueState, formData: FormData) : Promise<GalleryCritiqueState> {
+    const validatedFields = galleryCritiqueSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { status: 'error', error: 'Invalid input for gallery critique.' };
+    }
+
+    const { theme, images: imagesJson } = validatedFields.data;
+    const images: ImagePlaceholder[] = JSON.parse(imagesJson);
+
+    try {
+      const imageProms = images.map(async (image) => {
+        const response = await fetch(image.imageUrl);
+        if (!response.ok) {
+            console.warn(`Failed to fetch image ${image.imageUrl}. Skipping.`);
+            return null;
+        }
+        const imageBuffer = await response.arrayBuffer();
+        const base64Image = Buffer.from(imageBuffer).toString('base64');
+        const mimeType = response.headers.get('content-type') || 'image/jpeg';
+        return {
+          id: image.id,
+          dataUri: `data:${mimeType};base64,${base64Image}`,
+        };
+      });
+
+      const imageData = (await Promise.all(imageProms)).filter(Boolean) as {id: string, dataUri: string}[];
+
+      const critique = await provideAiPoweredGalleryCritiqueFlow({
+          theme,
+          images: imageData,
+      });
+
+      return { status: 'success', data: critique };
+
+    } catch (error) {
+        console.error(error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { status: 'error', error: `Failed to generate gallery critique: ${errorMessage}` };
     }
 }
