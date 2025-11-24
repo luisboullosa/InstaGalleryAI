@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -8,7 +9,7 @@ import { AppHeader } from '@/app/components/layout/header';
 import GalleryGrid from '@/app/components/gallery-grid';
 import ImageCritiqueView from '@/app/components/image-critique-view';
 import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
-import type { Critique, Theme } from '@/lib/types';
+import type { Critique, Theme, SavedGallery } from '@/lib/types';
 import { Bot, GalleryHorizontal, Sparkles, X } from 'lucide-react';
 import CritiqueReport from './components/critique-report';
 import GalleryCritiqueReport from './components/gallery-critique-report';
@@ -37,6 +38,8 @@ export default function Home() {
     savedGalleries,
     handleSaveGallery,
     handleSelectGallery,
+    isGoogleDriveConnected,
+    handleConnectGoogleDrive,
   } = useApp();
 
   const [selectedImage, setSelectedImage] = React.useState<ImagePlaceholder | null>(null);
@@ -121,13 +124,6 @@ export default function Home() {
     });
   };
 
-  const handleConnectGoogleDrive = () => {
-    toast({
-      title: 'Coming Soon!',
-      description: "Google Drive integration is not yet available.",
-    })
-  };
-
   const handleCritiqueGallery = () => {
     if (!currentTheme) return;
 
@@ -194,7 +190,7 @@ export default function Home() {
   }, [galleryCritiqueState, toast]);
 
   // When selecting a saved gallery, reset the critique state
-  const handleSelectAndReset = (gallery: any) => {
+  const handleSelectAndReset = (gallery: SavedGallery) => {
     handleSelectGallery(gallery);
     React.startTransition(() => {
       galleryCritiqueAction({type: 'reset'});
@@ -209,6 +205,7 @@ export default function Home() {
             currentTheme={currentTheme}
             isInstagramConnected={isInstagramConnected}
             onConnectInstagram={handleConnectInstagram}
+            isGoogleDriveConnected={isGoogleDriveConnected}
             onConnectGoogleDrive={handleConnectGoogleDrive}
             savedGalleries={savedGalleries}
             onSelectGallery={handleSelectAndReset}

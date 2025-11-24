@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -17,10 +18,12 @@ type AppContextType = {
   critiques: Critique[];
   setCritiques: React.Dispatch<React.SetStateAction<Critique[]>>;
   isInstagramConnected: boolean;
-  setIsInstagramConnected: React.Dispatch<React.SetStateAction<boolean>>;
   handleConnectInstagram: () => void;
+  handleDisconnectInstagram: () => void;
+  isGoogleDriveConnected: boolean;
+  handleConnectGoogleDrive: () => void;
+  handleDisconnectGoogleDrive: () => void;
   savedGalleries: SavedGallery[];
-  setSavedGalleries: React.Dispatch<React.SetStateAction<SavedGallery[]>>;
   handleSaveGallery: (theme: Theme, images: ImagePlaceholder[], critiques: Critique[]) => void;
   handleSelectGallery: (gallery: SavedGallery) => void;
   agents: AgentState;
@@ -34,6 +37,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [galleryImages, setGalleryImages] = React.useState<ImagePlaceholder[]>([]);
   const [critiques, setCritiques] = React.useState<Critique[]>([]);
   const [isInstagramConnected, setIsInstagramConnected] = React.useState(false);
+  const [isGoogleDriveConnected, setIsGoogleDriveConnected] = React.useState(false);
   const [savedGalleries, setSavedGalleries] = React.useState<SavedGallery[]>([]);
   const { toast } = useToast();
   const router = useRouter();
@@ -60,6 +64,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       description: "You can now create galleries from your Instagram posts.",
     });
   };
+
+  const handleDisconnectInstagram = () => {
+    setIsInstagramConnected(false);
+    toast({
+        variant: 'destructive',
+        title: 'Instagram Disconnected',
+        description: "You will no longer be able to use your Instagram posts.",
+    });
+  };
+
+  const handleConnectGoogleDrive = () => {
+    setIsGoogleDriveConnected(true);
+    toast({
+        title: 'Google Drive Connected',
+        description: "You can now import images from your Google Drive.",
+    });
+  }
+
+  const handleDisconnectGoogleDrive = () => {
+    setIsGoogleDriveConnected(false);
+    toast({
+        variant: 'destructive',
+        title: 'Google Drive Disconnected',
+        description: "You will no longer be able to import from Google Drive.",
+    });
+  }
 
   const handleSaveGallery = (theme: Theme, images: ImagePlaceholder[], critiques: Critique[]) => {
     const existingIndex = savedGalleries.findIndex(g => g.theme.name === theme.name);
@@ -101,9 +131,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         currentTheme, setCurrentTheme,
         galleryImages, setGalleryImages,
         critiques, setCritiques,
-        isInstagramConnected, setIsInstagramConnected,
+        isInstagramConnected,
         handleConnectInstagram,
-        savedGalleries, setSavedGalleries,
+        handleDisconnectInstagram,
+        isGoogleDriveConnected,
+        handleConnectGoogleDrive,
+        handleDisconnectGoogleDrive,
+        savedGalleries, 
         handleSaveGallery,
         handleSelectGallery,
         agents,

@@ -1,9 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { AppHeader } from '@/app/components/layout/header';
 import { AppSidebar } from '@/app/components/layout/sidebar';
-import { Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { useApp } from '@/app/context/app-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -59,9 +59,9 @@ export default function CommunityPage() {
     handleConnectInstagram,
     savedGalleries,
     handleSelectGallery,
+    isGoogleDriveConnected,
+    handleConnectGoogleDrive,
   } = useApp();
-
-  const handleConnectGoogleDrive = () => {}; // Placeholder
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex min-h-screen">
@@ -71,6 +71,7 @@ export default function CommunityPage() {
           currentTheme={currentTheme}
           isInstagramConnected={isInstagramConnected}
           onConnectInstagram={handleConnectInstagram}
+          isGoogleDriveConnected={isGoogleDriveConnected}
           onConnectGoogleDrive={handleConnectGoogleDrive}
           savedGalleries={savedGalleries}
           onSelectGallery={handleSelectGallery}

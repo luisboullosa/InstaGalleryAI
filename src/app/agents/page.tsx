@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -21,9 +22,9 @@ export default function AgentsPage() {
     handleConnectInstagram,
     savedGalleries,
     handleSelectGallery,
+    isGoogleDriveConnected,
+    handleConnectGoogleDrive,
   } = useApp();
-
-  const handleConnectGoogleDrive = () => {}; // Placeholder
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex min-h-screen">
@@ -33,6 +34,7 @@ export default function AgentsPage() {
           currentTheme={currentTheme}
           isInstagramConnected={isInstagramConnected}
           onConnectInstagram={handleConnectInstagram}
+          isGoogleDriveConnected={isGoogleDriveConnected}
           onConnectGoogleDrive={handleConnectGoogleDrive}
           savedGalleries={savedGalleries}
           onSelectGallery={handleSelectGallery}

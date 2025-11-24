@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -23,12 +24,13 @@ type AppSidebarProps = {
   currentTheme: Theme | null;
   isInstagramConnected: boolean;
   onConnectInstagram: () => void;
+  isGoogleDriveConnected: boolean;
   onConnectGoogleDrive: () => void;
   savedGalleries: SavedGallery[];
   onSelectGallery: (gallery: SavedGallery) => void;
 };
 
-export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected, onConnectInstagram, onConnectGoogleDrive, savedGalleries, onSelectGallery }: AppSidebarProps) {
+export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected, onConnectInstagram, isGoogleDriveConnected, onConnectGoogleDrive, savedGalleries, onSelectGallery }: AppSidebarProps) {
   const pathname = usePathname();
   
   const isHomePage = pathname === '/';
@@ -99,9 +101,9 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
             <Instagram />
             <span>{isInstagramConnected ? 'Instagram Connected' : 'Connect Instagram'}</span>
           </Button>
-          <Button onClick={onConnectGoogleDrive} variant="outline" className="w-full justify-start gap-2">
+          <Button onClick={onConnectGoogleDrive} variant={isGoogleDriveConnected ? 'secondary' : 'outline'} className="w-full justify-start gap-2" disabled={isGoogleDriveConnected}>
             <FolderKanban />
-            <span>Connect Google Drive</span>
+            <span>{isGoogleDriveConnected ? 'Drive Connected' : 'Connect Google Drive'}</span>
           </Button>
         </div>
       </SidebarFooter>

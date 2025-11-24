@@ -9,7 +9,7 @@ import { useApp } from '@/app/context/app-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Tag, ShieldQuestion, Moon, Sun, Laptop, Download, Bell, Trash2 } from 'lucide-react';
+import { Tag, ShieldQuestion, Moon, Sun, Laptop, Download, Bell, Trash2, Instagram, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -58,6 +58,14 @@ function UserProfile() {
 
 function AccountSettings() {
     const { setTheme } = useTheme();
+    const { 
+        isInstagramConnected, 
+        handleConnectInstagram, 
+        handleDisconnectInstagram,
+        isGoogleDriveConnected,
+        handleConnectGoogleDrive,
+        handleDisconnectGoogleDrive
+    } = useApp();
 
     return (
         <div className="space-y-8">
@@ -75,6 +83,47 @@ function AccountSettings() {
                             <Button variant="outline" onClick={() => setTheme('dark')}><Moon className="mr-2" /> Dark</Button>
                             <Button variant="outline" onClick={() => setTheme('system')}><Laptop className="mr-2" /> System</Button>
                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Connected Accounts</CardTitle>
+                    <CardDescription>Manage connections to third-party services.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                            <Instagram className="h-6 w-6" />
+                            <div>
+                                <Label className="text-base">Instagram</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {isInstagramConnected ? "Connected. Used for creating galleries from your posts." : "Not connected."}
+                                </p>
+                            </div>
+                        </div>
+                        {isInstagramConnected ? (
+                            <Button variant="outline" onClick={handleDisconnectInstagram}>Disconnect</Button>
+                        ) : (
+                            <Button onClick={handleConnectInstagram}>Connect</Button>
+                        )}
+                    </div>
+                     <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                            <FolderKanban className="h-6 w-6" />
+                            <div>
+                                <Label className="text-base">Google Drive</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {isGoogleDriveConnected ? "Connected. Used for importing images." : "Not connected."}
+                                </p>
+                            </div>
+                        </div>
+                        {isGoogleDriveConnected ? (
+                            <Button variant="outline" onClick={handleDisconnectGoogleDrive}>Disconnect</Button>
+                        ) : (
+                            <Button onClick={handleConnectGoogleDrive}>Connect</Button>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -141,9 +190,9 @@ export default function ProfilePage() {
     handleConnectInstagram,
     savedGalleries,
     handleSelectGallery,
+    isGoogleDriveConnected,
+    handleConnectGoogleDrive,
   } = useApp();
-
-  const handleConnectGoogleDrive = () => {}; // Placeholder
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex min-h-screen">
@@ -153,6 +202,7 @@ export default function ProfilePage() {
           currentTheme={currentTheme}
           isInstagramConnected={isInstagramConnected}
           onConnectInstagram={handleConnectInstagram}
+          isGoogleDriveConnected={isGoogleDriveConnected}
           onConnectGoogleDrive={handleConnectGoogleDrive}
           savedGalleries={savedGalleries}
           onSelectGallery={handleSelectGallery}
@@ -180,7 +230,7 @@ export default function ProfilePage() {
                         <p className="text-muted-foreground">Manage your profile and account settings.</p>
                     </header>
                     
-                    <Tabs defaultValue="profile">
+                    <Tabs defaultValue="settings">
                         <TabsList className="grid w-full grid-cols-2 max-w-md">
                             <TabsTrigger value="profile">Profile</TabsTrigger>
                             <TabsTrigger value="settings">Settings</TabsTrigger>
