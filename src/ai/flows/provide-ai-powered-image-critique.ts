@@ -72,18 +72,18 @@ const provideAiPoweredImageCritiquePrompt = ai.definePrompt({
   Provide a detailed critique of the image, considering the artistic intention, theme relevance, and AI usage, all from the perspective of your assigned persona.
   Identify the type of art (e.g., photography, plastic art).
   Determine if AI was used in the creation/edition of the image and provide feedback on how it was used.
-  Assess how well the image aligns with the theme: {{{theme}}}.
-  Consider the artist's stated intention: {{{artisticIntention}}}.
+  Assess how well the image aligns with the gallery's theme: "{{theme}}".
+  Consider the artist's stated intention: "{{artisticIntention}}".
 
   Here is the image: {{media url=imageDataUri}}
 
-  Your critique should be structured as follows:
-  - Critique: [Detailed critique of the image from your persona's viewpoint]
-  - Art Type: [The type of art]
-  - AI Used: [Yes/No]
-  - AI Usage Feedback: [Feedback on AI usage, if applicable]
-  - Theme Relevance: [How relevant the image is to the theme]
-  - Intention Respect Feedback: [How well did AI respect the author's intention]
+  Your critique should be structured as a JSON object with the following fields:
+  - critique: A detailed critique of the image from your persona's viewpoint.
+  - artType: The identified type of art.
+  - isAiUsed: A boolean indicating if AI was used.
+  - aiUsageFeedback: Feedback on AI usage, if applicable.
+  - themeRelevance: Your assessment of how relevant the image is to the gallery's theme.
+  - intentionRespectFeedback: How well any AI usage respected the author's stated intention.
   `,
 });
 
