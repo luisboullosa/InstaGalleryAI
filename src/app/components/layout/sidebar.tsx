@@ -12,7 +12,7 @@ import {
 import { Logo } from '@/components/logo';
 import { ThemeCreator } from '@/app/components/theme-creator';
 import type { Theme, SavedGallery } from '@/lib/types';
-import { Home, Instagram, FolderKanban, Library, Users } from 'lucide-react';
+import { Home, Instagram, FolderKanban, Library, Users, MessageSquareQuote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -32,6 +32,8 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
   const pathname = usePathname();
   
   const isHomePage = pathname === '/';
+  const isAgentsPage = pathname === '/agents';
+  const isCommunityPage = pathname === '/community';
 
   return (
     <>
@@ -74,11 +76,17 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
             </SidebarMenuItem>
           )}
            <SidebarMenuItem>
-                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground/80">Settings</h3>
+                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground/80">Social & Settings</h3>
                  <Link href="/agents" className="w-full">
-                    <SidebarMenuButton tooltip="Agents" isActive={pathname === '/agents'}>
+                    <SidebarMenuButton tooltip="Agents" isActive={isAgentsPage}>
                         <Users />
-                        <span>Agents</span>
+                        <span>AI Agents</span>
+                    </SidebarMenuButton>
+                </Link>
+                <Link href="/community" className="w-full">
+                    <SidebarMenuButton tooltip="Community" isActive={isCommunityPage}>
+                        <MessageSquareQuote />
+                        <span>Community</span>
                     </SidebarMenuButton>
                 </Link>
           </SidebarMenuItem>

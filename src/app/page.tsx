@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useActionState, useTransition } from 'react';
+import { useActionState } from 'react';
 import { AppSidebar } from '@/app/components/layout/sidebar';
 import { AppHeader } from '@/app/components/layout/header';
 import GalleryGrid from '@/app/components/gallery-grid';
@@ -91,6 +91,9 @@ export default function Home() {
   const handleImageRemove = (imageToRemove: ImagePlaceholder) => {
     setGalleryImages(prev => prev.filter(img => img.id !== imageToRemove.id));
     setCritiques(prev => prev.filter(c => c.imageId !== imageToRemove.id));
+    if (selectedImage?.id === imageToRemove.id) {
+        setSelectedImage(null);
+    }
   };
 
   const handleAddImages = () => {

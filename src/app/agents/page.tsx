@@ -52,7 +52,7 @@ export default function AgentsPage() {
         <main className="flex-1 p-4 md:p-6">
             <div className="space-y-4">
                 <header>
-                    <h1 className="text-2xl font-bold tracking-tight">Agent Management</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">AI Agent Management</h1>
                     <p className="text-muted-foreground">Activate or deactivate AI critics for your gallery reviews.</p>
                 </header>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
