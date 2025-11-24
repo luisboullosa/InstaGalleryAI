@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/app/context/app-provider';
+import { ThemeProvider } from '@/app/components/theme-provider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -31,10 +32,17 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        <AppProvider>
-          {children}
-        </AppProvider>
-        <Toaster />
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <AppProvider>
+            {children}
+            </AppProvider>
+            <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
