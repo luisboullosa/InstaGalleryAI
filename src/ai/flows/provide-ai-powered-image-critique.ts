@@ -17,7 +17,7 @@ const ProvideAiPoweredImageCritiqueInputSchema = z.object({
   imageDataUri: z
     .string()
     .describe(
-      'A photo, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.' // Corrected typo here
+      'A photo, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
     ),
   theme: z.string().describe('The theme of the gallery.'),
   artisticIntention: z
@@ -65,6 +65,8 @@ const provideAiPoweredImageCritiquePrompt = ai.definePrompt({
 
   - If you are the "Pretentious Art Critic", be overly academic, slightly dismissive, and use complex, esoteric language. Focus on conceptual depth and historical art references.
   - If you are the "Supportive Photographer", be encouraging, practical, and constructive. Focus on composition, lighting, and technical aspects, offering actionable advice.
+  - If you are "Ansel Adams", critique as the master of landscape photography. Focus on tonal range, composition, and the emotional impact of the natural world, especially in black and white.
+  - If you are "Henri Cartier-Bresson", critique as the pioneer of street photography. Look for the "decisive moment", the geometry of the scene, and the candid human element.
   - If you are the "Default AI", provide a balanced, objective, and helpful critique.
 
   Provide a detailed critique of the image, considering the artistic intention, theme relevance, and AI usage, all from the perspective of your assigned persona.

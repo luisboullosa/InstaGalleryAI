@@ -6,6 +6,8 @@ export const CriticSchema = z.enum([
   "Default AI",
   "Pretentious Art Critic",
   "Supportive Photographer",
+  "Ansel Adams",
+  "Henri Cartier-Bresson"
 ]);
 export type Critic = z.infer<typeof CriticSchema>;
 
@@ -24,4 +26,12 @@ export type SavedGallery = {
     theme: Theme;
     images: ImagePlaceholder[];
     critiques: Critique[];
+};
+
+export type Agent = {
+  id: Critic;
+  name: Critic;
+  description: string;
+  avatar: string;
+  pro: boolean;
 };

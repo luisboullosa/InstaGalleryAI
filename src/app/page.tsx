@@ -14,18 +14,29 @@ import CritiqueReport from './components/critique-report';
 import GalleryCritiqueReport from './components/gallery-critique-report';
 import { useToast } from '@/hooks/use-toast';
 import { getGalleryCritiqueAction, type GalleryCritiqueState } from '@/app/actions';
+import { useApp } from './context/app-provider';
 
 const initialGalleryCritiqueState: GalleryCritiqueState = { status: 'idle' };
 
 export default function Home() {
-  const [currentTheme, setCurrentTheme] = React.useState<Theme | null>(null);
-  const [galleryImages, setGalleryImages] = React.useState<ImagePlaceholder[]>([]);
+  const {
+    currentTheme,
+    setCurrentTheme,
+    galleryImages,
+    setGalleryImages,
+    critiques,
+    setCritiques,
+    isInstagramConnected,
+    handleConnectInstagram,
+    savedGalleries,
+    handleSaveGallery,
+    handleSelectGallery,
+  } = useApp();
+
   const [selectedImage, setSelectedImage] = React.useState<ImagePlaceholder | null>(null);
-  const [critiques, setCritiques] = React.useState<Critique[]>([]);
   const [isReportOpen, setReportOpen] = React.useState(false);
   const [isGalleryReportOpen, setGalleryReportOpen] = React.useState(false);
-  const [isInstagramConnected, setIsInstagramConnected] = React.useState(false);
-  const [savedGalleries, setSavedGalleries] = React.useState<SavedGallery[]>([]);
+  
   const { toast } = useToast();
 
   const [galleryCritiqueState, galleryCritiqueAction] = useActionState(getGalleryCritiqueAction, initialGalleryCritiqueState);
@@ -92,14 +103,6 @@ export default function Home() {
     });
   };
 
-  const handleConnectInstagram = () => {
-    setIsInstagramConnected(true);
-    toast({
-      title: 'Instagram Connected',
-      description: "You can now create galleries from your Instagram posts.",
-    })
-  };
-
   const handleConnectGoogleDrive = () => {
     toast({
       title: 'Coming Soon!',
@@ -117,28 +120,6 @@ export default function Home() {
         galleryCritiqueAction(formData);
     });
   }
-
-  const handleSaveGallery = () => {
-    if (!currentTheme) return;
-    const newSavedGallery: SavedGallery = {
-        id: currentTheme.name + '-' + Date.now(),
-        theme: currentTheme,
-        images: galleryImages,
-        critiques: critiques,
-    };
-    setSavedGalleries(prev => [...prev, newSavedGallery]);
-    toast({
-        title: 'Gallery Saved',
-        description: `"${currentTheme.name}" has been added to your collection.`,
-    });
-  };
-
-  const handleSelectGallery = (gallery: SavedGallery) => {
-    setCurrentTheme(gallery.theme);
-    setGalleryImages(gallery.images);
-    setCritiques(gallery.critiques);
-    setSelectedImage(null);
-  };
 
   const handleExport = () => {
     toast({
@@ -181,7 +162,7 @@ export default function Home() {
           onCritiqueGallery={handleCritiqueGallery}
           isGalleryCritiqueLoading={isGalleryCritiquePending}
           onAddImages={handleAddImages}
-          onSaveGallery={handleSaveGallery}
+          onSaveGallery={() => currentTheme && handleSaveGallery(currentTheme, galleryImages, critiques)}
           onExport={handleExport}
         />
         <main className="flex-1 p-4 md:p-6 overflow-auto">

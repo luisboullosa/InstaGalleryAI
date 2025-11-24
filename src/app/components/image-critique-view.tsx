@@ -29,7 +29,7 @@ import { type ImagePlaceholder } from '@/lib/placeholder-images';
 import type { Critique, Theme, Critic } from '@/lib/types';
 import { Bot, CheckCircle2, Wand2, XCircle, Users } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CriticSchema } from '@/lib/types';
+import { useApp } from '../context/app-provider';
 
 const initialState: CritiqueState = { status: 'idle' };
 
@@ -128,10 +128,14 @@ type ImageCritiqueViewProps = {
 };
 
 export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated }: ImageCritiqueViewProps) {
+  const { agents } = useApp();
+  const activeCritics = React.useMemo(() => Object.values(agents).filter(a => a.active), [agents]);
+
   const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
   const { toast } = useToast();
   const formRef = React.useRef<HTMLFormElement>(null);
-  const [critic, setCritic] = React.useState<Critic>(CriticSchema.options[0]);
+  
+  const [critic, setCritic] = React.useState<Critic>(activeCritics[0]?.id || 'Default AI');
 
   React.useEffect(() => {
     if (state.status === 'error' && state.error) {
@@ -157,9 +161,11 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
       // A bit of a hack to reset useFormState
       const mutableInitialState = initialState as { status: CritiqueState['status'] };
       mutableInitialState.status = 'idle';
-      setCritic(CriticSchema.options[0]);
+      if (activeCritics.length > 0) {
+        setCritic(activeCritics[0].id);
+      }
     }
-  }, [image]);
+  }, [image, activeCritics]);
 
   return (
     <Sheet open={!!image} onOpenChange={onOpenChange}>
@@ -208,8 +214,8 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                                 <SelectValue placeholder="Select a critic..." />
                               </SelectTrigger>
                               <SelectContent>
-                                {CriticSchema.options.map((criticName) => (
-                                    <SelectItem key={criticName} value={criticName}>{criticName}</SelectItem>
+                                {activeCritics.map((agent) => (
+                                    <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
                                 ))}
                               </SelectContent>
                           </Select>

@@ -12,8 +12,10 @@ import {
 import { Logo } from '@/components/logo';
 import { ThemeCreator } from '@/app/components/theme-creator';
 import type { Theme, SavedGallery } from '@/lib/types';
-import { Bell, Home, Instagram, FolderKanban, Library } from 'lucide-react';
+import { Bell, Home, Instagram, FolderKanban, Library, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type AppSidebarProps = {
   onCreateGallery: (theme: Theme) => void;
@@ -26,6 +28,10 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected, onConnectInstagram, onConnectGoogleDrive, savedGalleries, onSelectGallery }: AppSidebarProps) {
+  const pathname = usePathname();
+  
+  const isHomePage = pathname === '/';
+
   return (
     <>
       <SidebarHeader>
@@ -36,14 +42,16 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
       </SidebarHeader>
 
       <SidebarContent className="p-2">
-        <ThemeCreator onCreateGallery={onCreateGallery} isInstagramConnected={isInstagramConnected} />
+        {isHomePage && <ThemeCreator onCreateGallery={onCreateGallery} isInstagramConnected={isInstagramConnected} />}
         <SidebarSeparator className="my-4" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Dashboard" isActive={!currentTheme}>
-              <Home />
-              <span>Dashboard</span>
-            </SidebarMenuButton>
+            <Link href="/" passHref legacyBehavior>
+                <SidebarMenuButton tooltip="Dashboard" isActive={isHomePage && !currentTheme}>
+                    <Home />
+                    <span>Dashboard</span>
+                </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
           {savedGalleries.length > 0 && (
             <SidebarMenuItem>
@@ -52,7 +60,7 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
                     <SidebarMenuButton 
                         key={gallery.id}
                         tooltip={gallery.theme.name}
-                        isActive={currentTheme?.name === gallery.theme.name}
+                        isActive={isHomePage && currentTheme?.name === gallery.theme.name}
                         onClick={() => onSelectGallery(gallery)}
                     >
                         <Library />
@@ -61,11 +69,14 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
                 ))}
             </SidebarMenuItem>
           )}
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Notifications">
-              <Bell />
-              <span>Notifications</span>
-            </SidebarMenuButton>
+           <SidebarMenuItem>
+                <h3 className="px-2 py-1 text-xs font-semibold text-muted-foreground">Settings</h3>
+                 <Link href="/agents" passHref legacyBehavior>
+                    <SidebarMenuButton tooltip="Agents" isActive={pathname === '/agents'}>
+                        <Users />
+                        <span>Agents</span>
+                    </SidebarMenuButton>
+                </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
