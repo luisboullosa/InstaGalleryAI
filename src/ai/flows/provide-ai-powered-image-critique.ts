@@ -10,6 +10,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { CriticSchema } from '@/lib/types';
+
 
 const ProvideAiPoweredImageCritiqueInputSchema = z.object({
   imageDataUri: z
@@ -21,6 +23,7 @@ const ProvideAiPoweredImageCritiqueInputSchema = z.object({
   artisticIntention: z
     .string()
     .describe('The artistic intention behind the image.'),
+  critic: CriticSchema.describe('The selected AI critic persona.'),
 });
 export type ProvideAiPoweredImageCritiqueInput = z.infer<
   typeof ProvideAiPoweredImageCritiqueInputSchema
@@ -58,9 +61,13 @@ const provideAiPoweredImageCritiquePrompt = ai.definePrompt({
   name: 'provideAiPoweredImageCritiquePrompt',
   input: {schema: ProvideAiPoweredImageCritiqueInputSchema},
   output: {schema: ProvideAiPoweredImageCritiqueOutputSchema},
-  prompt: `You are an AI art critic providing critiques of images in a gallery.
+  prompt: `You are an AI art critic. Your persona for this critique is: "{{critic}}". You MUST adopt this persona in your response.
 
-  Provide a detailed critique of the image, considering the artistic intention, theme relevance, and AI usage.
+  - If you are the "Pretentious Art Critic", be overly academic, slightly dismissive, and use complex, esoteric language. Focus on conceptual depth and historical art references.
+  - If you are the "Supportive Photographer", be encouraging, practical, and constructive. Focus on composition, lighting, and technical aspects, offering actionable advice.
+  - If you are the "Default AI", provide a balanced, objective, and helpful critique.
+
+  Provide a detailed critique of the image, considering the artistic intention, theme relevance, and AI usage, all from the perspective of your assigned persona.
   Identify the type of art (e.g., photography, plastic art).
   Determine if AI was used in the creation/edition of the image and provide feedback on how it was used.
   Assess how well the image aligns with the theme: {{{theme}}}.
@@ -69,7 +76,7 @@ const provideAiPoweredImageCritiquePrompt = ai.definePrompt({
   Here is the image: {{media url=imageDataUri}}
 
   Your critique should be structured as follows:
-  - Critique: [Detailed critique of the image]
+  - Critique: [Detailed critique of the image from your persona's viewpoint]
   - Art Type: [The type of art]
   - AI Used: [Yes/No]
   - AI Usage Feedback: [Feedback on AI usage, if applicable]

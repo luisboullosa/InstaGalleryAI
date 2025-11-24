@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { suggestThemes as suggestThemesFlow } from '@/ai/flows/suggest-themes-based-on-history';
 import { provideAiPoweredImageCritique as provideAiPoweredImageCritiqueFlow } from '@/ai/flows/provide-ai-powered-image-critique';
+import { CriticSchema } from '@/lib/types';
 
 export type SuggestThemesState = {
   status: 'success' | 'error' | 'idle';
@@ -51,6 +52,7 @@ const critiqueSchema = z.object({
     imageId: z.string(),
     artisticIntention: z.string().min(1, 'Please describe your artistic intention.'),
     theme: z.string(),
+    critic: CriticSchema,
 });
 
 export async function getImageCritiqueAction(prevState: CritiqueState, formData: FormData) : Promise<CritiqueState> {
@@ -63,7 +65,7 @@ export async function getImageCritiqueAction(prevState: CritiqueState, formData:
         };
     }
 
-    const { imageUrl, artisticIntention, theme } = validatedFields.data;
+    const { imageUrl, artisticIntention, theme, critic } = validatedFields.data;
 
     try {
         const response = await fetch(imageUrl);
@@ -80,6 +82,7 @@ export async function getImageCritiqueAction(prevState: CritiqueState, formData:
             imageDataUri,
             artisticIntention,
             theme,
+            critic,
         });
 
         return { status: 'success', data: critique };

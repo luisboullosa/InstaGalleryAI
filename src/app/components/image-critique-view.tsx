@@ -22,13 +22,14 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getImageCritiqueAction, type CritiqueState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { type ImagePlaceholder } from '@/lib/placeholder-images';
-import type { Critique, Theme } from '@/lib/types';
-import { Bot, CheckCircle2, Wand2, XCircle } from 'lucide-react';
+import type { Critique, Theme, Critic } from '@/lib/types';
+import { Bot, CheckCircle2, Wand2, XCircle, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CriticSchema } from '@/lib/types';
 
 const initialState: CritiqueState = { status: 'idle' };
 
@@ -127,9 +128,10 @@ type ImageCritiqueViewProps = {
 };
 
 export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated }: ImageCritiqueViewProps) {
-  const [state, formAction] = React.useActionState(getImageCritiqueAction, initialState);
+  const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
   const { toast } = useToast();
   const formRef = React.useRef<HTMLFormElement>(null);
+  const [critic, setCritic] = React.useState<Critic>(CriticSchema.options[0]);
 
   React.useEffect(() => {
     if (state.status === 'error' && state.error) {
@@ -153,7 +155,9 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
     if (image) {
       formRef.current?.reset();
       // A bit of a hack to reset useFormState
-      (initialState as CritiqueState).status = 'idle';
+      const mutableInitialState = initialState as { status: CritiqueState['status'] };
+      mutableInitialState.status = 'idle';
+      setCritic(CriticSchema.options[0]);
     }
   }, [image]);
 
@@ -165,7 +169,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
             <SheetHeader>
               <SheetTitle>AI-Powered Critique</SheetTitle>
               <SheetDescription>
-                Get feedback on your image based on your artistic goals.
+                Get feedback on your image from a council of AI critics.
               </SheetDescription>
             </SheetHeader>
             <div className="flex-1 overflow-y-auto pr-6 -mr-6 grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
@@ -184,16 +188,33 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                         <input type="hidden" name="imageUrl" value={image.imageUrl} />
                         <input type="hidden" name="imageId" value={image.id} />
                         <input type="hidden" name="theme" value={theme?.name || 'General'} />
+                        <input type="hidden" name="critic" value={critic} />
 
                         <div className="space-y-2">
-                        <Label htmlFor="artistic-intention">Artistic Intention</Label>
-                        <Textarea
-                            id="artistic-intention"
-                            name="artisticIntention"
-                            placeholder="e.g., 'Capture the feeling of loneliness in a bustling city...'"
-                            required
-                        />
+                            <Label htmlFor="artistic-intention">Artistic Intention</Label>
+                            <Textarea
+                                id="artistic-intention"
+                                name="artisticIntention"
+                                placeholder="e.g., 'Capture the feeling of loneliness in a bustling city...'"
+                                required
+                            />
                         </div>
+
+                        <div className="space-y-2">
+                          <Label>Council of Critics</Label>
+                          <Select name="critic" value={critic} onValueChange={(value) => setCritic(value as Critic)}>
+                              <SelectTrigger>
+                                <Users className="mr-2" />
+                                <SelectValue placeholder="Select a critic..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CriticSchema.options.map((criticName) => (
+                                    <SelectItem key={criticName} value={criticName}>{criticName}</SelectItem>
+                                ))}
+                              </SelectContent>
+                          </Select>
+                        </div>
+                        
                         <SheetFooter className="mt-auto !flex-col sm:!flex-row">
                             <SubmitCritiqueButton />
                         </SheetFooter>
