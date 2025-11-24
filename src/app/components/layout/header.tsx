@@ -11,20 +11,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Theme } from '@/lib/types';
-import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle, Save, Download } from 'lucide-react';
+import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle, Save, Download, Eye } from 'lucide-react';
 
 type AppHeaderProps = {
   theme: Theme | null;
   onShowReport: () => void;
   hasCritiques: boolean;
   onCritiqueGallery: () => void;
+  onShowGalleryCritique: () => void;
+  hasExistingGalleryCritique: boolean;
   isGalleryCritiqueLoading: boolean;
   onAddImages: () => void;
   onSaveGallery: () => void;
   onExport: () => void;
 };
 
-export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, isGalleryCritiqueLoading, onAddImages, onSaveGallery, onExport }: AppHeaderProps) {
+export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, onShowGalleryCritique, hasExistingGalleryCritique, isGalleryCritiqueLoading, onAddImages, onSaveGallery, onExport }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
@@ -45,19 +47,28 @@ export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Images
                 </Button>
-                <Button variant="outline" size="sm" onClick={onCritiqueGallery} disabled={isGalleryCritiqueLoading}>
-                {isGalleryCritiqueLoading ? (
-                    <>
-                    <Bot className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                    </>
+
+                {hasExistingGalleryCritique ? (
+                  <Button variant="outline" size="sm" onClick={onShowGalleryCritique}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Show Critique
+                  </Button>
                 ) : (
-                    <>
-                    <Bot className="mr-2 h-4 w-4" />
-                    Critique Gallery
-                    </>
+                  <Button variant="outline" size="sm" onClick={onCritiqueGallery} disabled={isGalleryCritiqueLoading}>
+                    {isGalleryCritiqueLoading ? (
+                        <>
+                        <Bot className="mr-2 h-4 w-4 animate-spin" />
+                        Analyzing...
+                        </>
+                    ) : (
+                        <>
+                        <Bot className="mr-2 h-4 w-4" />
+                        Critique Gallery
+                        </>
+                    )}
+                  </Button>
                 )}
-                </Button>
+
                 <Button variant="outline" size="sm" onClick={onSaveGallery}>
                     <Save className="mr-2 h-4 w-4" />
                     Save

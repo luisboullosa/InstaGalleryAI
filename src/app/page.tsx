@@ -48,6 +48,7 @@ export default function Home() {
   const [isGalleryCritiquePending, startGalleryCritiqueTransition] = useTransition();
   
   const detailViewActive = !!selectedImage || showGalleryCritique;
+  const hasExistingGalleryCritique = galleryCritiqueState.status === 'success' && galleryCritiqueState.data;
 
   const handleCreateGallery = (theme: Theme) => {
     setCurrentTheme(theme);
@@ -120,12 +121,25 @@ export default function Home() {
   const handleCritiqueGallery = () => {
     if (!currentTheme) return;
 
+    if (hasExistingGalleryCritique) {
+        setShowGalleryCritique(true);
+        setSelectedImage(null);
+        return;
+    }
+
     startGalleryCritiqueTransition(() => {
         const formData = new FormData();
         formData.append('theme', currentTheme.name);
         formData.append('images', JSON.stringify(galleryImages));
         galleryCritiqueAction(formData);
     });
+  }
+
+  const handleShowGalleryCritique = () => {
+    if (hasExistingGalleryCritique) {
+      setShowGalleryCritique(true);
+      setSelectedImage(null);
+    }
   }
 
   const handleExport = () => {
@@ -180,6 +194,8 @@ export default function Home() {
               onShowReport={() => setReportOpen(true)}
               hasCritiques={critiques.length > 0}
               onCritiqueGallery={handleCritiqueGallery}
+              onShowGalleryCritique={handleShowGalleryCritique}
+              hasExistingGalleryCritique={!!hasExistingGalleryCritique}
               isGalleryCritiqueLoading={isGalleryCritiquePending}
               onAddImages={handleAddImages}
               onSaveGallery={() => currentTheme && handleSaveGallery(currentTheme, galleryImages, critiques)}
