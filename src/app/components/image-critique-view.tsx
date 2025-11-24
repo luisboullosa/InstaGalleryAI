@@ -53,7 +53,7 @@ function SubmitCritiqueButton() {
   );
 }
 
-function CritiqueResult({ critique, onDelete }: { critique: NonNullable<CritiqueState['data']>, onDelete: () => void }) {
+function CritiqueResult({ critique, onDelete }: { critique: Critique, onDelete: () => void }) {
   return (
     <div className="space-y-4 pt-4">
        <div className="flex justify-between items-center">
@@ -170,19 +170,27 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
 
   React.useEffect(() => {
     if (image) {
-      formRef.current?.reset();
-      const mutableInitialState = initialState as { status: CritiqueState['status'] };
-      mutableInitialState.status = 'idle';
+        // Do not reset the entire form state, just the action state
+        const mutableInitialState = state as CritiqueState;
+        mutableInitialState.status = 'idle';
+        delete mutableInitialState.data;
+        delete mutableInitialState.error;
+
 
       if (activeCritics.length > 0 && !activeCritics.find(c => c.id === critic)) {
         setCritic(activeCritics[0].id);
       }
     }
-  }, [image, activeCritics, critic]);
+  }, [image, activeCritics, critic, state]);
   
   const handleDeleteCritique = () => {
     if (image) {
       onCritiqueDeleted(image.id);
+      // Also reset the form action state
+      const mutableInitialState = state as CritiqueState;
+      mutableInitialState.status = 'idle';
+      delete mutableInitialState.data;
+
       toast({
         title: "Critique Deleted",
         description: "The critique for this image has been removed."
@@ -254,6 +262,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                     </form>
                     
                     {state.status === 'loading' && <CritiqueSkeleton />}
+                    
                     {currentCritiqueData && state.status !== 'loading' && (
                         <CritiqueResult critique={currentCritiqueData} onDelete={handleDeleteCritique} />
                     )}
