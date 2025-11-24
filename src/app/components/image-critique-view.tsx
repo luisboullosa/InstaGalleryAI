@@ -27,9 +27,10 @@ import { getImageCritiqueAction, type CritiqueState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { type ImagePlaceholder } from '@/lib/placeholder-images';
 import type { Critique, Theme, Critic } from '@/lib/types';
-import { Bot, CheckCircle2, Wand2, XCircle, Users } from 'lucide-react';
+import { Bot, CheckCircle2, Wand2, XCircle, Users, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '../context/app-provider';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const initialState: CritiqueState = { status: 'idle' };
 
@@ -52,9 +53,15 @@ function SubmitCritiqueButton() {
   );
 }
 
-function CritiqueResult({ critique }: { critique: NonNullable<CritiqueState['data']> }) {
+function CritiqueResult({ critique, onDelete }: { critique: NonNullable<CritiqueState['data']>, onDelete: () => void }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
+       <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Critique Result</h3>
+        <Button variant="ghost" size="icon" onClick={onDelete} aria-label="Delete critique">
+            <Trash2 className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </div>
       <Card>
         <CardContent className="p-4 space-y-2">
           <p className="text-sm text-foreground">{critique.critique}</p>
@@ -99,7 +106,8 @@ function CritiqueResult({ critique }: { critique: NonNullable<CritiqueState['dat
 
 function CritiqueSkeleton() {
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4">
+             <Skeleton className="h-6 w-1/3" />
             <Card>
                 <CardContent className="p-4 space-y-2">
                     <Skeleton className="h-4 w-full" />
@@ -125,10 +133,11 @@ type ImageCritiqueViewProps = {
   theme: Theme | null;
   onOpenChange: (isOpen: boolean) => void;
   onCritiqueGenerated: (critique: Critique) => void;
+  onCritiqueDeleted: (imageId: string) => void;
 };
 
-export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated }: ImageCritiqueViewProps) {
-  const { agents } = useApp();
+export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiqueGenerated, onCritiqueDeleted }: ImageCritiqueViewProps) {
+  const { agents, critiques } = useApp();
   const activeCritics = React.useMemo(() => Object.values(agents).filter(a => a.active), [agents]);
 
   const [state, formAction] = useActionState(getImageCritiqueAction, initialState);
@@ -136,6 +145,11 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
   const formRef = React.useRef<HTMLFormElement>(null);
   
   const [critic, setCritic] = React.useState<Critic>(activeCritics[0]?.id || 'Default AI');
+  
+  const existingCritique = React.useMemo(() => {
+    if (!image) return null;
+    return critiques.find(c => c.imageId === image.id) || null;
+  }, [critiques, image]);
 
   React.useEffect(() => {
     if (state.status === 'error' && state.error) {
@@ -155,31 +169,42 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
   }, [state, toast, image, onCritiqueGenerated]);
 
   React.useEffect(() => {
-    // Reset form state when image changes
     if (image) {
       formRef.current?.reset();
-      // A bit of a hack to reset useFormState
       const mutableInitialState = initialState as { status: CritiqueState['status'] };
       mutableInitialState.status = 'idle';
-      if (activeCritics.length > 0) {
+
+      if (activeCritics.length > 0 && !activeCritics.find(c => c.id === critic)) {
         setCritic(activeCritics[0].id);
       }
     }
-  }, [image, activeCritics]);
+  }, [image, activeCritics, critic]);
+  
+  const handleDeleteCritique = () => {
+    if (image) {
+      onCritiqueDeleted(image.id);
+      toast({
+        title: "Critique Deleted",
+        description: "The critique for this image has been removed."
+      })
+    }
+  }
 
+  const currentCritiqueData = state.status === 'success' ? state.data : existingCritique;
+  
   return (
     <Sheet open={!!image} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col">
+      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col p-0">
         {image && (
           <>
-            <SheetHeader>
+            <SheetHeader className="p-6 pb-2">
               <SheetTitle>AI-Powered Critique</SheetTitle>
               <SheetDescription>
                 Get feedback on your image from a council of AI critics.
               </SheetDescription>
             </SheetHeader>
-            <div className="flex-1 overflow-y-auto pr-6 -mr-6 grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
-                <div className="relative aspect-square lg:aspect-auto rounded-lg overflow-hidden">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
+                <div className="relative rounded-lg overflow-hidden m-6 mb-0 lg:m-0 lg:ml-6 lg:mb-6">
                     <Image
                         src={image.imageUrl}
                         alt={image.description}
@@ -189,7 +214,8 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                     />
                 </div>
                 
-                <div className="flex flex-col gap-4">
+                <ScrollArea className="flex flex-col gap-4">
+                  <div className="p-6 pt-0 lg:pt-6">
                     <form action={formAction} ref={formRef} className="space-y-4">
                         <input type="hidden" name="imageUrl" value={image.imageUrl} />
                         <input type="hidden" name="imageId" value={image.id} />
@@ -202,6 +228,7 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                                 id="artistic-intention"
                                 name="artisticIntention"
                                 placeholder="e.g., 'Capture the feeling of loneliness in a bustling city...'"
+                                defaultValue={existingCritique?.artisticIntention || ''}
                                 required
                             />
                         </div>
@@ -221,14 +248,17 @@ export default function ImageCritiqueView({ image, theme, onOpenChange, onCritiq
                           </Select>
                         </div>
                         
-                        <SheetFooter className="mt-auto !flex-col sm:!flex-row">
+                        <SheetFooter className="!flex-col sm:!flex-row">
                             <SubmitCritiqueButton />
                         </SheetFooter>
                     </form>
                     
                     {state.status === 'loading' && <CritiqueSkeleton />}
-                    {state.status === 'success' && state.data && <CritiqueResult critique={state.data} />}
-                </div>
+                    {currentCritiqueData && state.status !== 'loading' && (
+                        <CritiqueResult critique={currentCritiqueData} onDelete={handleDeleteCritique} />
+                    )}
+                  </div>
+                </ScrollArea>
             </div>
           </>
         )}

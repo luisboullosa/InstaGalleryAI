@@ -75,6 +75,10 @@ export default function Home() {
   const handleCritiqueGenerated = (critique: Critique) => {
     setCritiques(prev => [...prev.filter(c => c.imageId !== critique.imageId), critique]);
   };
+  
+  const handleCritiqueDeleted = (imageId: string) => {
+    setCritiques(prev => prev.filter(c => c.imageId !== imageId));
+  };
 
   const handleImageRemove = (imageToRemove: ImagePlaceholder) => {
     setGalleryImages(prev => prev.filter(img => img.id !== imageToRemove.id));
@@ -195,6 +199,7 @@ export default function Home() {
         theme={currentTheme}
         onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}
         onCritiqueGenerated={handleCritiqueGenerated}
+        onCritiqueDeleted={handleCritiqueDeleted}
       />
 
       <CritiqueReport
