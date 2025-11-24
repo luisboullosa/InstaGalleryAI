@@ -8,7 +8,7 @@ import { Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import GalleryGrid from '@/app/components/gallery-grid';
 import ImageCritiqueView from '@/app/components/image-critique-view';
 import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
-import type { Critique, Theme } from '@/lib/types';
+import type { Critique, Theme, SavedGallery } from '@/lib/types';
 import { Bot, GalleryHorizontal, Sparkles } from 'lucide-react';
 import CritiqueReport from './components/critique-report';
 import GalleryCritiqueReport from './components/gallery-critique-report';
@@ -25,6 +25,7 @@ export default function Home() {
   const [isReportOpen, setReportOpen] = React.useState(false);
   const [isGalleryReportOpen, setGalleryReportOpen] = React.useState(false);
   const [isInstagramConnected, setIsInstagramConnected] = React.useState(false);
+  const [savedGalleries, setSavedGalleries] = React.useState<SavedGallery[]>([]);
   const { toast } = useToast();
 
   const [galleryCritiqueState, galleryCritiqueAction] = useActionState(getGalleryCritiqueAction, initialGalleryCritiqueState);
@@ -92,8 +93,6 @@ export default function Home() {
   };
 
   const handleConnectInstagram = () => {
-    // In a real app, this would trigger the OAuth flow.
-    // For now, we'll just simulate a successful connection.
     setIsInstagramConnected(true);
     toast({
       title: 'Instagram Connected',
@@ -119,6 +118,35 @@ export default function Home() {
     });
   }
 
+  const handleSaveGallery = () => {
+    if (!currentTheme) return;
+    const newSavedGallery: SavedGallery = {
+        id: currentTheme.name + '-' + Date.now(),
+        theme: currentTheme,
+        images: galleryImages,
+        critiques: critiques,
+    };
+    setSavedGalleries(prev => [...prev, newSavedGallery]);
+    toast({
+        title: 'Gallery Saved',
+        description: `"${currentTheme.name}" has been added to your collection.`,
+    });
+  };
+
+  const handleSelectGallery = (gallery: SavedGallery) => {
+    setCurrentTheme(gallery.theme);
+    setGalleryImages(gallery.images);
+    setCritiques(gallery.critiques);
+    setSelectedImage(null);
+  };
+
+  const handleExport = () => {
+    toast({
+        title: 'Coming Soon!',
+        description: 'The export feature is under development.',
+    });
+  }
+
   React.useEffect(() => {
     if (galleryCritiqueState.status === 'success' && galleryCritiqueState.data) {
         setGalleryReportOpen(true);
@@ -141,6 +169,8 @@ export default function Home() {
           isInstagramConnected={isInstagramConnected}
           onConnectInstagram={handleConnectInstagram}
           onConnectGoogleDrive={handleConnectGoogleDrive}
+          savedGalleries={savedGalleries}
+          onSelectGallery={handleSelectGallery}
         />
       </Sidebar>
       <SidebarInset className="flex flex-col">
@@ -151,6 +181,8 @@ export default function Home() {
           onCritiqueGallery={handleCritiqueGallery}
           isGalleryCritiqueLoading={isGalleryCritiquePending}
           onAddImages={handleAddImages}
+          onSaveGallery={handleSaveGallery}
+          onExport={handleExport}
         />
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           {galleryImages.length > 0 && currentTheme ? (

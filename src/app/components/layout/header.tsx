@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Theme } from '@/lib/types';
-import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle } from 'lucide-react';
+import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle, Save, Download } from 'lucide-react';
 
 type AppHeaderProps = {
   theme: Theme | null;
@@ -21,9 +21,11 @@ type AppHeaderProps = {
   onCritiqueGallery: () => void;
   isGalleryCritiqueLoading: boolean;
   onAddImages: () => void;
+  onSaveGallery: () => void;
+  onExport: () => void;
 };
 
-export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, isGalleryCritiqueLoading, onAddImages }: AppHeaderProps) {
+export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, isGalleryCritiqueLoading, onAddImages, onSaveGallery, onExport }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
@@ -57,6 +59,14 @@ export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery
                     Critique Gallery
                     </>
                 )}
+                </Button>
+                <Button variant="outline" size="sm" onClick={onSaveGallery}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
+                </Button>
+                <Button variant="outline" size="sm" onClick={onExport}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
                 </Button>
             </>
         )}
