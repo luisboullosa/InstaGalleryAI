@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node ./scripts/start-dev.js dev --turbopack -p 9002",
-    "seed:images": "node ./scripts/dev-seed-images.js",
+    "dev": "node ./scripts/start-dev.mjs dev --turbopack -p 9002",
+    "seed:images": "node ./scripts/dev-seed-images.mjs",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "cross-env NODE_ENV=production next build",
