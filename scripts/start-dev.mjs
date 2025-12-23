@@ -3,9 +3,12 @@
 import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
 
 const args = process.argv.slice(2);
-const shimPath = path.resolve(new URL('.', import.meta.url).pathname, 'server-localstorage-shim.js');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const shimPath = path.resolve(__dirname, 'server-localstorage-shim.js');
 // Load .env.local if present to supply development secrets (not committed)
 try {
   const dotenv = await import('dotenv');
