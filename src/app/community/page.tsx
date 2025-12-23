@@ -56,6 +56,7 @@ export default function CommunityPage() {
   const {
     currentTheme,
     isInstagramConnected,
+        isInstagramConnecting,
     handleConnectInstagram,
     savedGalleries,
     handleSelectGallery,
@@ -70,6 +71,7 @@ export default function CommunityPage() {
           onCreateGallery={() => {}}
           currentTheme={currentTheme}
           isInstagramConnected={isInstagramConnected}
+                    isInstagramConnecting={isInstagramConnecting}
           onConnectInstagram={handleConnectInstagram}
           isGoogleDriveConnected={isGoogleDriveConnected}
           onConnectGoogleDrive={handleConnectGoogleDrive}
@@ -134,7 +136,7 @@ export default function CommunityPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Critiques on Your Galleries</CardTitle>
-                                    <CardDescription>See feedback from other users you've requested critiques from.</CardDescription>
+                                    <CardDescription>See feedback from other users you&apos;ve requested critiques from.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="p-8 border rounded-lg bg-muted/50 text-center flex flex-col justify-center items-center">

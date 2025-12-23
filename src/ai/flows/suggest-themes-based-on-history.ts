@@ -30,7 +30,8 @@ const SuggestThemesOutputSchema = z.object({
 export type SuggestThemesOutput = z.infer<typeof SuggestThemesOutputSchema>;
 
 export async function suggestThemes(input: SuggestThemesInput): Promise<SuggestThemesOutput> {
-  return suggestThemesFlow(input);
+  const r = await (suggestThemesFlow as unknown as (input: unknown) => Promise<SuggestThemesOutput>)(input);
+  return r as SuggestThemesOutput;
 }
 
 const prompt = ai.definePrompt({
@@ -54,8 +55,9 @@ const suggestThemesFlow = ai.defineFlow(
     inputSchema: SuggestThemesInputSchema,
     outputSchema: SuggestThemesOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input: unknown) => {
+    const parsed = SuggestThemesInputSchema.parse(input);
+    const {output} = await prompt(parsed);
+    return output as SuggestThemesOutput;
   }
 );

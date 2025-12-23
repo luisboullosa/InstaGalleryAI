@@ -54,7 +54,78 @@ export type ProvideAiPoweredImageCritiqueOutput = z.infer<
 export async function provideAiPoweredImageCritique(
   input: ProvideAiPoweredImageCritiqueInput
 ): Promise<ProvideAiPoweredImageCritiqueOutput> {
-  return provideAiPoweredImageCritiqueFlow(input);
+  // If a Gemini/Google API key is configured, use genkit (Gemini). Otherwise fallback to local Ollama.
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+  if (hasGeminiKey) {
+    const result = await (provideAiPoweredImageCritiqueFlow as unknown as (input: unknown) => Promise<ProvideAiPoweredImageCritiqueOutput>)(input);
+    return result as ProvideAiPoweredImageCritiqueOutput;
+  }
+
+  // Normalize Ollama host (supports host:port without protocol)
+  const { default: getOllamaHost } = await import('@/lib/ollama');
+  const OLLAMA_HOST = getOllamaHost();
+
+  // Build a plain-text prompt similar to the genkit prompt template.
+  const prompt = `You are an AI art critic. Your persona for this critique is: "${input.critic}". You MUST adopt this persona in your response.
+
+  Provide a detailed critique of the image, considering the artistic intention, theme relevance, and AI usage, all from the perspective of your assigned persona.
+  Identify the type of art (e.g., photography, plastic art).
+  Determine if AI was used in the creation/edition of the image and provide feedback on how it was used.
+  Assess how well the image aligns with the gallery's theme: "${input.theme}".
+  Consider the artist's stated intention: "${input.artisticIntention}".
+
+  Here is the image: ${input.imageDataUri}
+
+  Your critique should be structured as a JSON object with the following fields:
+  - critique: A detailed critique of the image from your persona's viewpoint.
+  - artType: The identified type of art.
+  - isAiUsed: A boolean indicating if AI was used.
+  - aiUsageFeedback: Feedback on AI usage, if applicable.
+  - themeRelevance: Your assessment of how relevant the image is to the gallery's theme.
+  - intentionRespectFeedback: How well any AI usage respected the author's stated intention.
+  `;
+
+  try {
+    const res = await fetch(`${OLLAMA_HOST}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'llama2', prompt }),
+    });
+    if (!res.ok) throw new Error(`Ollama call failed: ${res.status} ${res.statusText}`);
+    const body = await res.json();
+    let text = '';
+    if (body.output && Array.isArray(body.output) && body.output[0] && body.output[0].content) {
+      text = body.output[0].content;
+    } else if (body.result) {
+      text = typeof body.result === 'string' ? body.result : JSON.stringify(body.result);
+    } else if (typeof body === 'string') {
+      text = body;
+    } else {
+      text = JSON.stringify(body);
+    }
+
+    let parsed = null;
+    try { parsed = JSON.parse(text); } catch {
+      const m = text.match(/\{[\s\S]*\}/);
+      if (m) {
+        try { parsed = JSON.parse(m[0]); } catch { parsed = null; }
+      }
+    }
+
+    if (!parsed) throw new Error('Could not parse JSON from Ollama response');
+
+    return {
+      critique: String(parsed.critique || parsed.review || ''),
+      isAiUsed: Boolean(parsed.isAiUsed),
+      aiUsageFeedback: String(parsed.aiUsageFeedback || parsed.ai_feedback || ''),
+      artType: String(parsed.artType || parsed.art_type || ''),
+      themeRelevance: String(parsed.themeRelevance || parsed.theme_relevance || ''),
+      intentionRespectFeedback: String(parsed.intentionRespectFeedback || parsed.intention_respect_feedback || ''),
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 const provideAiPoweredImageCritiquePrompt = ai.definePrompt({
@@ -93,8 +164,9 @@ const provideAiPoweredImageCritiqueFlow = ai.defineFlow(
     inputSchema: ProvideAiPoweredImageCritiqueInputSchema,
     outputSchema: ProvideAiPoweredImageCritiqueOutputSchema,
   },
-  async input => {
-    const {output} = await provideAiPoweredImageCritiquePrompt(input);
-    return output!;
+  async (input: unknown) => {
+    const typed = input as ProvideAiPoweredImageCritiqueInput;
+    const {output} = await provideAiPoweredImageCritiquePrompt(typed);
+    return output as ProvideAiPoweredImageCritiqueOutput;
   }
 );

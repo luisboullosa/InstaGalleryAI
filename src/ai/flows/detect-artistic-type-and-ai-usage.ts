@@ -29,7 +29,8 @@ const DetectArtisticTypeAndAIUsageOutputSchema = z.object({
 export type DetectArtisticTypeAndAIUsageOutput = z.infer<typeof DetectArtisticTypeAndAIUsageOutputSchema>;
 
 export async function detectArtisticTypeAndAIUsage(input: DetectArtisticTypeAndAIUsageInput): Promise<DetectArtisticTypeAndAIUsageOutput> {
-  return detectArtisticTypeAndAIUsageFlow(input);
+  const r = await (detectArtisticTypeAndAIUsageFlow as unknown as (input: unknown) => Promise<DetectArtisticTypeAndAIUsageOutput>)(input);
+  return r as DetectArtisticTypeAndAIUsageOutput;
 }
 
 const prompt = ai.definePrompt({
@@ -54,8 +55,9 @@ const detectArtisticTypeAndAIUsageFlow = ai.defineFlow(
     inputSchema: DetectArtisticTypeAndAIUsageInputSchema,
     outputSchema: DetectArtisticTypeAndAIUsageOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input: unknown) => {
+    const typed = input as DetectArtisticTypeAndAIUsageInput;
+    const {output} = await prompt(typed);
+    return output as DetectArtisticTypeAndAIUsageOutput;
   }
 );

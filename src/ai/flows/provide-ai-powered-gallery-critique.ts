@@ -38,7 +38,61 @@ export type ProvideAiPoweredGalleryCritiqueOutput = z.infer<typeof ProvideAiPowe
 export async function provideAiPoweredGalleryCritique(
   input: ProvideAiPoweredGalleryCritiqueInput
 ): Promise<ProvideAiPoweredGalleryCritiqueOutput> {
-  return provideAiPoweredGalleryCritiqueFlow(input);
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+  if (hasGeminiKey) {
+    const r = await (provideAiPoweredGalleryCritiqueFlow as unknown as (input: unknown) => Promise<ProvideAiPoweredGalleryCritiqueOutput>)(input);
+    return r as ProvideAiPoweredGalleryCritiqueOutput;
+  }
+
+  // Normalize Ollama host (supports host:port without protocol)
+  const { default: getOllamaHost } = await import('@/lib/ollama');
+  const OLLAMA_HOST = getOllamaHost();
+
+  // Build a text prompt similar to the genkit template
+  const imageList = input.images.map(img => `Image ${img.id}: ${img.dataUri}`).join('\n');
+  const prompt = `You are a council of AI art critics tasked with reviewing a gallery of images. Your council consists of the "Pretentious Art Critic" and the "Supportive Photographer".
+
+The theme of this gallery is: "${input.theme}".
+
+Here are the images:\n${imageList}
+
+Please provide a comprehensive critique of the gallery as a JSON object with the following arrays: overallAssessment, curationAndCoherence, emergingThreads, futureDevelopment. Each array contains objects with { critic, statement }.
+`;
+
+  try {
+    const res = await fetch(`${OLLAMA_HOST}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'llama2', prompt }),
+    });
+    if (!res.ok) throw new Error(`Ollama call failed: ${res.status} ${res.statusText}`);
+    const body = await res.json();
+    let text = '';
+    if (body.output && Array.isArray(body.output) && body.output[0] && body.output[0].content) {
+      text = body.output[0].content;
+    } else if (body.result) {
+      text = typeof body.result === 'string' ? body.result : JSON.stringify(body.result);
+    } else if (typeof body === 'string') {
+      text = body;
+    } else {
+      text = JSON.stringify(body);
+    }
+
+    let parsed = null;
+    try { parsed = JSON.parse(text); } catch {
+      const m = text.match(/\{[\s\S]*\}/);
+      if (m) {
+        try { parsed = JSON.parse(m[0]); } catch { parsed = null; }
+      }
+    }
+
+    if (!parsed) throw new Error('Could not parse JSON from Ollama response');
+
+    return parsed as ProvideAiPoweredGalleryCritiqueOutput;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 const prompt = ai.definePrompt({
@@ -70,8 +124,9 @@ const provideAiPoweredGalleryCritiqueFlow = ai.defineFlow(
     inputSchema: ProvideAiPoweredGalleryCritiqueInputSchema,
     outputSchema: ProvideAiPoweredGalleryCritiqueOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input: unknown) => {
+    const typed = input as ProvideAiPoweredGalleryCritiqueInput;
+    const {output} = await prompt(typed);
+    return output as ProvideAiPoweredGalleryCritiqueOutput;
   }
 );

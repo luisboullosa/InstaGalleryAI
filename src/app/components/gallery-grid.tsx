@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { type ImagePlaceholder } from '@/lib/placeholder-images';
+import { type ImagePlaceholder } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 import Image from 'next/image';

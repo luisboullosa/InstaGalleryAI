@@ -89,6 +89,14 @@ export default function GalleryCritiqueReport({
   return (
     <ScrollArea className="flex-1">
         <div className="p-4">
+                        {theme && (
+                                <div className="mb-4 flex items-center justify-between">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                                Theme: {theme.name}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">Source: {theme.source}</p>
+                                </div>
+                        )}
         {!critique ? <ReportSkeleton /> : (
             <div className="space-y-6">
                 <CritiqueSection title="Overall Assessment" icon={<Users size={20} />} sections={critique.overallAssessment} />
@@ -109,7 +117,7 @@ export default function GalleryCritiqueReport({
                         <h3 className="text-lg font-semibold mb-2">Discuss with the Council</h3>
                         <div className="p-4 border rounded-lg bg-muted/50 text-center">
                             <p className="text-sm text-muted-foreground">This feature is coming soon!</p>
-                            <p className="text-xs text-muted-foreground mt-1">You'll be able to ask follow-up questions to the critics.</p>
+                            <p className="text-xs text-muted-foreground mt-1">You&apos;ll be able to ask follow-up questions to the critics.</p>
                         </div>
                     </div>
                 </div>

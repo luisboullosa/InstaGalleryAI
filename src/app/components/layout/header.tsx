@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useApp } from '@/app/context/app-provider';
 import type { Theme } from '@/lib/types';
 import { FileText, Instagram, LogOut, Settings, User, Bot, PlusCircle, Save, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
@@ -28,6 +29,7 @@ type AppHeaderProps = {
 };
 
 export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery, onShowGalleryCritique, hasExistingGalleryCritique, isGalleryCritiqueLoading, onAddImages, onSaveGallery, onExport }: AppHeaderProps) {
+  const app = useApp();
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
@@ -90,8 +92,11 @@ export function AppHeader({ theme, onShowReport, hasCritiques, onCritiqueGallery
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="https://picsum.photos/seed/avatar/100/100" alt="@shadcn" data-ai-hint="person" />
-                <AvatarFallback>U</AvatarFallback>
+                {/* Show real avatar (profile image or first post) when Instagram is connected */}
+                {app.instagramProfileImage || app.instagramCollections?.posts?.[0]?.imageUrl ? (
+                  <AvatarImage src={app.instagramProfileImage || app.instagramCollections?.posts?.[0]?.imageUrl || ''} alt="User" data-ai-hint="person" />
+                ) : null}
+                <AvatarFallback />
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

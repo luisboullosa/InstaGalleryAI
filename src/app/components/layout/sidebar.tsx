@@ -2,7 +2,6 @@
 'use client';
 
 import {
-  SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
@@ -23,14 +22,15 @@ type AppSidebarProps = {
   onCreateGallery: (theme: Theme) => void;
   currentTheme: Theme | null;
   isInstagramConnected: boolean;
-  onConnectInstagram: () => void;
+  onConnectInstagram: () => Promise<void>;
+  isInstagramConnecting: boolean;
   isGoogleDriveConnected: boolean;
   onConnectGoogleDrive: () => void;
   savedGalleries: SavedGallery[];
   onSelectGallery: (gallery: SavedGallery) => void;
 };
 
-export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected, onConnectInstagram, isGoogleDriveConnected, onConnectGoogleDrive, savedGalleries, onSelectGallery }: AppSidebarProps) {
+export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected, isInstagramConnecting, onConnectInstagram, isGoogleDriveConnected, onConnectGoogleDrive, savedGalleries, onSelectGallery }: AppSidebarProps) {
   const pathname = usePathname();
   
   const isHomePage = pathname === '/';
@@ -97,9 +97,20 @@ export function AppSidebar({ onCreateGallery, currentTheme, isInstagramConnected
 
       <SidebarFooter>
         <div className="space-y-2 p-2">
-          <Button onClick={onConnectInstagram} variant={isInstagramConnected ? 'secondary' : 'outline'} className="w-full justify-start gap-2" disabled={isInstagramConnected}>
+          <Button
+            onClick={onConnectInstagram}
+            variant={isInstagramConnected ? 'secondary' : 'outline'}
+            className="w-full justify-start gap-2"
+            disabled={isInstagramConnected || isInstagramConnecting}
+          >
             <Instagram />
-            <span>{isInstagramConnected ? 'Instagram Connected' : 'Connect Instagram'}</span>
+            <span>
+              {isInstagramConnected
+                ? 'Instagram Connected'
+                : isInstagramConnecting
+                  ? 'Connecting…'
+                  : 'Connect Instagram'}
+            </span>
           </Button>
           <Button onClick={onConnectGoogleDrive} variant={isGoogleDriveConnected ? 'secondary' : 'outline'} className="w-full justify-start gap-2" disabled={isGoogleDriveConnected}>
             <FolderKanban />

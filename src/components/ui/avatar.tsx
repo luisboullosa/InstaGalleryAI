@@ -43,8 +43,16 @@ const AvatarFallback = React.forwardRef<
       className
     )}
     {...props}
-  />
+  >
+    {/* Camera + person silhouette icon */}
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M4 7h3l1.5-2h6L17 7h3a1 1 0 011 1v8a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth="0.8" />
+      <circle cx="12" cy="9" r="1.8" fill="currentColor" />
+    </svg>
+  </AvatarPrimitive.Fallback>
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
 export { Avatar, AvatarImage, AvatarFallback }
+

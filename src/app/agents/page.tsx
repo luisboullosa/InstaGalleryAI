@@ -19,6 +19,7 @@ export default function AgentsPage() {
     toggleAgent,
     currentTheme,
     isInstagramConnected,
+        isInstagramConnecting,
     handleConnectInstagram,
     savedGalleries,
     handleSelectGallery,
@@ -33,6 +34,7 @@ export default function AgentsPage() {
           onCreateGallery={() => {}}
           currentTheme={currentTheme}
           isInstagramConnected={isInstagramConnected}
+                    isInstagramConnecting={isInstagramConnecting}
           onConnectInstagram={handleConnectInstagram}
           isGoogleDriveConnected={isGoogleDriveConnected}
           onConnectGoogleDrive={handleConnectGoogleDrive}

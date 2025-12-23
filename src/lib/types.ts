@@ -1,6 +1,12 @@
 import type { ProvideAiPoweredImageCritiqueOutput } from '@/ai/flows/provide-ai-powered-image-critique';
 import { z } from 'zod';
-import type { ImagePlaceholder } from './placeholder-images';
+
+export type ImagePlaceholder = {
+  id: string;
+  description: string;
+  imageUrl: string;
+  imageHint?: string;
+};
 
 export const CriticSchema = z.enum([
   "Default AI",
@@ -19,6 +25,7 @@ export type Critique = ProvideAiPoweredImageCritiqueOutput & {
 export type Theme = {
   name: string;
   source: 'user' | 'ai';
+  strictness?: number; // 0-100 selection strictness used when creating galleries
 };
 
 export type SavedGallery = {

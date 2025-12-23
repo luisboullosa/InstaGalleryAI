@@ -9,7 +9,7 @@ import { useApp } from '@/app/context/app-provider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Tag, ShieldQuestion, Moon, Sun, Laptop, Download, Bell, Trash2, Instagram, FolderKanban } from 'lucide-react';
+import { Tag, ShieldQuestion, Moon, Sun, Laptop, Download, Trash2, Instagram, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -187,6 +187,7 @@ export default function ProfilePage() {
   const {
     currentTheme,
     isInstagramConnected,
+        isInstagramConnecting,
     handleConnectInstagram,
     savedGalleries,
     handleSelectGallery,
@@ -201,6 +202,7 @@ export default function ProfilePage() {
           onCreateGallery={() => {}}
           currentTheme={currentTheme}
           isInstagramConnected={isInstagramConnected}
+                    isInstagramConnecting={isInstagramConnecting}
           onConnectInstagram={handleConnectInstagram}
           isGoogleDriveConnected={isGoogleDriveConnected}
           onConnectGoogleDrive={handleConnectGoogleDrive}

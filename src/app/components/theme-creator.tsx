@@ -47,6 +47,7 @@ type ThemeCreatorProps = {
 
 export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCreatorProps) {
   const [themeInput, setThemeInput] = React.useState('');
+  const [strictness, setStrictness] = React.useState<number>(50);
   const [state, formAction] = React.useActionState(suggestThemesAction, initialState);
   const { toast } = useToast();
 
@@ -63,7 +64,7 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
   const handleUserThemeSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (themeInput.trim()) {
-      onCreateGallery({ name: themeInput.trim(), source: 'user' });
+      onCreateGallery({ name: themeInput.trim(), source: 'user', strictness });
       setThemeInput('');
     }
   };
@@ -128,7 +129,7 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
                 variant="secondary"
                 size="sm"
                 className="font-normal"
-                onClick={() => onCreateGallery({ name: theme, source: 'ai' })}
+                onClick={() => onCreateGallery({ name: theme, source: 'ai', strictness })}
               >
                 {theme}
               </Button>
@@ -148,7 +149,7 @@ export function ThemeCreator({ onCreateGallery, isInstagramConnected }: ThemeCre
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
-        <Slider defaultValue={[50]} max={100} step={1} disabled={!isInstagramConnected} />
+        <Slider value={[strictness]} onValueChange={(v) => setStrictness(v[0])} max={100} step={1} disabled={!isInstagramConnected} />
         <div className="flex justify-between text-xs text-muted-foreground">
             <span>Lenient</span>
             <span>Harsh</span>

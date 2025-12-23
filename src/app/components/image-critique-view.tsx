@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useActionState } from 'react';
+import { useActionState, startTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getImageCritiqueAction, type CritiqueState } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { type ImagePlaceholder } from '@/lib/placeholder-images';
+import { type ImagePlaceholder } from '@/lib/types';
 import type { Critique, Theme, Critic } from '@/lib/types';
 import { Bot, CheckCircle2, Wand2, XCircle, Users, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -138,6 +138,8 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
   const { toast } = useToast();
   
   const [critic, setCritic] = React.useState<Critic>(activeCritics[0]?.id || 'Default AI');
+  const [models, setModels] = React.useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = React.useState<string>('');
   
   const existingCritique = React.useMemo(() => {
     if (!image) return null;
@@ -169,7 +171,9 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
       formRef.current?.reset();
       const resetFormData = new FormData();
       resetFormData.append('type', 'reset');
-      formAction(resetFormData);
+      startTransition(() => {
+        formAction(resetFormData);
+      });
 
       // Manually set the intention textarea value from the existing critique if present
       const intentionTextarea = formRef.current?.elements.namedItem('artisticIntention') as HTMLTextAreaElement | null;
@@ -184,6 +188,27 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
     }
   }, [image, existingCritique, activeCritics, critic, formAction]);
 
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/ai/models');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!mounted) return;
+          if (Array.isArray(data.models) && data.models.length > 0) {
+            setModels(data.models);
+            // Prefer an Ollama model when available (e.g., when Gemini isn't configured)
+            const preferred = data.models.find((m: string) => m.startsWith('ollama:')) || data.models[0];
+            setSelectedModel(preferred);
+          }
+      } catch {
+        // ignore discovery errors
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   // Determine what to display
   const critiqueToShow = (state.status === 'success' && state.data?.imageId === image?.id) ? { ...state.data, artisticIntention: formRef.current?.artisticIntention.value || '' } : existingCritique;
   
@@ -195,7 +220,9 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
       formRef.current?.reset();
       const resetFormData = new FormData();
       resetFormData.append('type', 'reset');
-      formAction(resetFormData);
+      startTransition(() => {
+        formAction(resetFormData);
+      });
     }
   }
 
@@ -237,6 +264,21 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
                     </div>
 
                     <div className="space-y-2">
+                      <Label>Model</Label>
+                      <Select name="model" value={selectedModel} onValueChange={(value) => setSelectedModel(value)} disabled={!!critiqueToShow}>
+                        <SelectTrigger>
+                          <Bot className="mr-2" />
+                          <SelectValue placeholder="Select a model..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {models.map((m) => (
+                            <SelectItem key={m} value={m}>{m.startsWith('ollama:') ? `Ollama — ${m.replace('ollama:', '')}` : `Gemini — ${m}`}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label>Council of Critics</Label>
                       <Select name="critic" value={critic} onValueChange={(value) => setCritic(value as Critic)} disabled={!!critiqueToShow}>
                           <SelectTrigger>
@@ -262,7 +304,7 @@ export default function ImageCritiqueView({ image, theme, onCritiqueGenerated, o
                     {isCritiquing && <CritiqueSkeleton />}
                 
                     {critiqueToShow && !isCritiquing && (
-                        <CritiqueResult critique={critiqueToShow} onDelete={handleDeleteCritique} />
+                      <CritiqueResult critique={critiqueToShow as Critique} onDelete={handleDeleteCritique} />
                     )}
 
                     {!critiqueToShow && !isCritiquing && (

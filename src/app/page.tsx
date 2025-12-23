@@ -5,23 +5,24 @@
 import * as React from 'react';
 import { useActionState } from 'react';
 import { AppSidebar } from '@/app/components/layout/sidebar';
+import { useToast } from '@/hooks/use-toast';
 import { AppHeader } from '@/app/components/layout/header';
 import GalleryGrid from '@/app/components/gallery-grid';
 import ImageCritiqueView from '@/app/components/image-critique-view';
-import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
+import type { ImagePlaceholder } from '@/lib/types';
 import type { Critique, Theme, SavedGallery } from '@/lib/types';
 import { Bot, GalleryHorizontal, Sparkles, X } from 'lucide-react';
 import CritiqueReport from './components/critique-report';
 import GalleryCritiqueReport from './components/gallery-critique-report';
-import { useToast } from '@/hooks/use-toast';
-import { getGalleryCritiqueAction, type GalleryCritiqueState } from '@/app/actions';
 import { useApp } from './context/app-provider';
+import { getGalleryCritiqueAction, type GalleryCritiqueState } from '@/app/actions';
 import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const initialGalleryCritiqueState: GalleryCritiqueState = { status: 'idle' };
 
@@ -34,12 +35,16 @@ export default function Home() {
     critiques,
     setCritiques,
     isInstagramConnected,
+    isInstagramConnecting,
     handleConnectInstagram,
     savedGalleries,
     handleSaveGallery,
     handleSelectGallery,
     isGoogleDriveConnected,
     handleConnectGoogleDrive,
+    instagramCollections,
+    activeInstagramCollection,
+    setActiveInstagramCollection,
   } = useApp();
 
   const [selectedImage, setSelectedImage] = React.useState<ImagePlaceholder | null>(null);
@@ -57,27 +62,32 @@ export default function Home() {
     setCurrentTheme(theme);
     setCritiques([]);
     React.startTransition(() => {
-        galleryCritiqueAction({type: 'reset'}); // Reset gallery critique state
-    });
-    
-    const imageMap = new Map<string, ImagePlaceholder>();
-    const themeKeywords = theme.name.toLowerCase().split(' ');
-
-    PlaceHolderImages.forEach(image => {
-        const hint = image.imageHint.toLowerCase();
-        if (themeKeywords.some(keyword => hint.includes(keyword))) {
-            imageMap.set(image.id, image);
-        }
+      galleryCritiqueAction({ type: 'reset' });
     });
 
-    let finalImages = Array.from(imageMap.values());
-    
-    if (finalImages.length === 0) {
-      const shuffled = [...PlaceHolderImages].sort(() => 0.5 - Math.random());
-      finalImages = shuffled.slice(0, 9);
+    // Only use Instagram images for gallery creation
+    if (!instagramCollections || !activeInstagramCollection) {
+      toast({
+        title: 'No Instagram Images',
+        description: 'Connect your Instagram account and select a collection to create a gallery.',
+        variant: 'destructive',
+      });
+      return;
     }
-  
-    setGalleryImages(finalImages.slice(0, 15));
+
+    const collection = instagramCollections[activeInstagramCollection] || [];
+    if (collection.length === 0) {
+      toast({
+        title: 'No Images Available',
+        description: `There are no images in your Instagram ${activeInstagramCollection} to create a gallery.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Optionally filter by theme keywords if desired, or just use all available images
+    // For now, just use up to 15 images from the collection
+    setGalleryImages(collection.slice(0, 15));
     setSelectedImage(null);
     setShowGalleryCritique(false);
   };
@@ -104,23 +114,33 @@ export default function Home() {
 
   const handleAddImages = () => {
     const existingIds = new Set(galleryImages.map(img => img.id));
-    const availableImages = PlaceHolderImages.filter(img => !existingIds.has(img.id));
-    
-    if (availableImages.length === 0) {
-        toast({
-            variant: 'destructive',
-            title: 'No More Images',
-            description: 'There are no more unique images to add.',
-        });
-        return;
+    // Only add images from the currently active Instagram collection.
+    // Do NOT fall back to placeholder images under any circumstance.
+    if (!instagramCollections || !activeInstagramCollection) {
+      toast({
+        title: 'No Instagram Feed',
+        description: 'Connect an Instagram account and select a collection to add images.',
+      });
+      return;
     }
 
-    const newImages = [...availableImages].sort(() => 0.5 - Math.random()).slice(0, 3);
-    
-    setGalleryImages(prev => [...prev, ...newImages]);
+    const collection = instagramCollections[activeInstagramCollection] || [];
+    const available = collection.filter(img => !existingIds.has(img.id));
+
+    if (available.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'No New Images',
+        description: `There are no new images available in ${activeInstagramCollection}.`,
+      });
+      return;
+    }
+
+    const toAdd = available.slice(0, 3);
+    setGalleryImages(prev => [...prev, ...toAdd]);
     toast({
-        title: 'Images Added',
-        description: `${newImages.length} new image(s) were added to the gallery.`,
+      title: 'More Instagram images added',
+      description: `${toAdd.length} new image(s) appended from ${activeInstagramCollection}.`,
     });
   };
 
@@ -204,6 +224,7 @@ export default function Home() {
             onCreateGallery={handleCreateGallery}
             currentTheme={currentTheme}
             isInstagramConnected={isInstagramConnected}
+            isInstagramConnecting={isInstagramConnecting}
             onConnectInstagram={handleConnectInstagram}
             isGoogleDriveConnected={isGoogleDriveConnected}
             onConnectGoogleDrive={handleConnectGoogleDrive}
@@ -227,12 +248,40 @@ export default function Home() {
               onExport={handleExport}
             />
             <main className="flex-1 p-4 md:p-6 overflow-auto">
+              {instagramCollections && (
+                <div className="mb-4">
+                  <Tabs
+                    value={activeInstagramCollection}
+                    onValueChange={(value) => {
+                      const nextValue = value as typeof activeInstagramCollection;
+                      setActiveInstagramCollection(nextValue);
+                      setGalleryImages(instagramCollections[nextValue]);
+                    }}
+                  >
+                    <TabsList>
+                      <TabsTrigger value="posts">Posts</TabsTrigger>
+                      <TabsTrigger value="stories">Stories</TabsTrigger>
+                      <TabsTrigger value="highlights">Highlights</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
               {galleryImages.length > 0 && currentTheme ? (
                 <GalleryGrid
                   images={galleryImages}
                   onImageSelect={handleImageSelect}
                   onImageRemove={handleImageRemove}
                 />
+              ) : instagramCollections && galleryImages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                  <div className="p-6 border-2 border-dashed rounded-full border-muted mb-4">
+                    <GalleryHorizontal size={48} />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-foreground">No images in this tab</h2>
+                  <p className="max-w-md mt-2">
+                    {`Instagram has no ${activeInstagramCollection} with images to show right now. Try another tab or reconnect to refresh the feed.`}
+                  </p>
+                </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                   <div className="p-6 border-2 border-dashed rounded-full border-muted mb-4">
@@ -268,7 +317,7 @@ export default function Home() {
               
               {showGalleryCritique ? (
                 <GalleryCritiqueReport
-                  critique={galleryCritiqueState.status === 'success' ? galleryCritiqueState.data : null}
+                  critique={galleryCritiqueState.status === 'success' && galleryCritiqueState.data ? galleryCritiqueState.data : null}
                   theme={currentTheme}
                   onDelete={handleDeleteGalleryCritique}
                 />
@@ -289,7 +338,7 @@ export default function Home() {
         isOpen={isReportOpen}
         onOpenChange={setReportOpen}
         critiques={critiques}
-        images={PlaceHolderImages}
+        images={galleryImages}
       />
     </ResizablePanelGroup>
   );
